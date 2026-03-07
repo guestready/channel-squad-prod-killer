@@ -101,7 +101,21 @@ def get_funny_title(count: int) -> str:
         return "Legendary Production Destroyer"
     if count <= 19:
         return "Living Legend of Broken Prod"
-    return "The Nuclear Option"
+    if count <= 29:
+        return "The Nuclear Option"
+    if count <= 39:
+        return "Extinction-Level Engineer"
+    if count <= 49:
+        return "Distinguished Fellow of Catastrophe"
+    if count <= 74:
+        return "Chaos Emeritus"
+    if count <= 99:
+        return "Grand Architect of Downtime"
+    if count <= 149:
+        return "Immortal Destroyer of SLAs"
+    if count <= 199:
+        return "The One Who Must Not Deploy"
+    return "Production's Final Boss"
 
 
 
