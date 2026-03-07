@@ -1,7 +1,7 @@
 # prod-killer
 
 An internal post-mortem tracker for when someone breaks production.
-Document the incident, name the culprit, and let the leaderboard do the rest.
+Document the incident, name the suspect, and let the leaderboard do the rest.
 
 > Built as a team culture / shame-driven accountability tool.
 
@@ -15,14 +15,14 @@ Document the incident, name the culprit, and let the leaderboard do the rest.
 
 ## Features
 
-- **Incident log** — title, description, how it was discovered, how it was resolved, who helped, relevant links
-- **Incident editing** — full edit and delete support for any logged incident
-- **User profiles** — name, team, optional nickname, automatic incident counter
-- **User management** — create, edit, and delete users (deletion blocked if they have incidents)
-- **Funny titles** — engineers earn progressively worse titles as their incident count grows
-- **Epitaphs** — a random personalized roast shown on every incident detail page
-- **Leaderboards** — monthly, yearly, and all-time rankings for individuals and teams, with HTMX tab switching
-- **Stats** — time-series bar chart of incidents, breakdowns by user and team
+- **Crime log** — title, description, how it was discovered, how it was resolved, who helped, relevant links
+- **Crime editing** — full edit and delete support for any logged crime
+- **User profiles** — name, team, optional nickname, automatic crime counter
+- **User management** — create, edit, and delete users (deletion blocked if they have crimes)
+- **Funny titles** — engineers earn progressively worse titles as their crime count grows
+- **Epitaphs** — a random personalized roast shown on every crime detail page
+- **Leaderboards** — monthly, yearly, and all-time rankings for suspects and syndicates, with HTMX tab switching
+- **Chart** — time-series bar chart of crimes with period switching (monthly / yearly / all-time)
 - **Password auth** — simple single-password gate, session-based
 
 ---
@@ -82,7 +82,7 @@ All config is via environment variables (or a `.env` file in the project root).
 |---|---|---|
 | `APP_PASSWORD` | Yes | Password to access the app |
 | `SECRET_KEY` | Yes | Secret for signing session cookies. Generate with: `python -c "import secrets; print(secrets.token_hex(32))"` |
-| `SEED_DATA` | No | Set to `true` to seed the database with 100 test incidents on first startup |
+| `SEED_DATA` | No | Set to `true` to seed the database with 100 test crimes on first startup |
 
 ---
 
@@ -91,15 +91,15 @@ All config is via environment variables (or a `.env` file in the project root).
 | Route | Description |
 |---|---|
 | `/login` | Password login |
-| `/` | Dashboard — recent incidents + stats snapshot |
-| `/incidents` | Full incident history with filters |
-| `/incidents/new` | Log a new incident |
-| `/incidents/{id}` | Incident detail with epitaph |
-| `/incidents/{id}/edit` | Edit an existing incident |
+| `/` | Dashboard — recent crimes + stats snapshot |
+| `/incidents/new` | Log a new crime |
+| `/incidents/{id}` | Crime detail with epitaph |
+| `/incidents/{id}/edit` | Edit an existing crime |
 | `/users` | Add and view users with their titles |
+| `/users/{id}` | User profile with crime history and rank |
 | `/users/{id}/edit` | Edit a user |
-| `/leaderboard` | Monthly / yearly / all-time shame rankings |
-| `/stats` | Time-series chart + per-user and per-team breakdowns |
+| `/teams/{team}` | Team profile with member list and crime history |
+| `/leaderboard` | Monthly / yearly / all-time shame rankings + time-series chart |
 
 ---
 
@@ -107,7 +107,7 @@ All config is via environment variables (or a `.env` file in the project root).
 
 ### Individual
 
-| Incidents | Title |
+| Crimes | Title |
 |---|---|
 | 0 | Production Guardian |
 | 1 | Baby Production Assassin |
@@ -130,7 +130,7 @@ All config is via environment variables (or a `.env` file in the project root).
 
 ### Team
 
-| Team Incidents | Title |
+| Team Crimes | Title |
 |---|---|
 | 0–2 | Mostly Harmless |
 | 3–5 | Known Troublemakers |
@@ -151,4 +151,4 @@ All config is via environment variables (or a `.env` file in the project root).
 SQLite database at `data/prod_killer.db`, persisted via Docker volume mount.
 To reset: delete the file and restart.
 
-Setting `SEED_DATA=true` seeds 100 incidents across 10 users on first startup (only runs on an empty database).
+Setting `SEED_DATA=true` seeds 100 crimes across 10 users on first startup (only runs on an empty database).

@@ -16,23 +16,23 @@
 
 <div class="stat-grid">
   <div class="stat-card">
-    <div class="label">Total Crimes</div>
+    <div class="label">Crimes</div>
     <div class="value">{{ total }}</div>
     <div class="sub">all time</div>
   </div>
+    <div class="stat-card">
+      <div class="label">Crimes This Year</div>
+      <div class="value">{{ this_year }}</div>
+      <div class="sub">so far...</div>
+    </div>
   <div class="stat-card">
-    <div class="label">This Month</div>
+    <div class="label">Crimes This Month</div>
     <div class="value">{{ this_month }}</div>
-    <div class="sub">keep going</div>
+    <div class="sub">yet...</div>
   </div>
   <div class="stat-card">
-    <div class="label">This Year</div>
-    <div class="value">{{ this_year }}</div>
-    <div class="sub">and counting</div>
-  </div>
-  <div class="stat-card">
-    <div class="label">Active Syndicates</div>
-    <div class="value">{{ teams }}</div>
+    <div class="label">Active Suspects</div>
+    <div class="value">{{ users | length }}</div>
     <div class="sub">none are innocent</div>
   </div>
   {% if top_offender %}
