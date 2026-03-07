@@ -52,6 +52,7 @@ def get_incidents(db: Session, limit: int = 100) -> list[models.Incident]:
 def search_incidents(
     db: Session,
     q: str = "",
+    user_id: int = 0,
     date_from: str = "",
     date_to: str = "",
     team: str = "",
@@ -65,6 +66,8 @@ def search_incidents(
     )
     if q:
         query = query.filter(models.Incident.title.ilike(f"%{q}%"))
+    if user_id:
+        query = query.filter(models.Incident.user_id == user_id)
     if date_from:
         query = query.filter(models.Incident.occurred_at >= datetime.fromisoformat(date_from))
     if date_to:

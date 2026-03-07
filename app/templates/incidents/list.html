@@ -7,7 +7,7 @@
     <h1>Incidents</h1>
     <p>Every glorious meltdown, documented for posterity.</p>
   </div>
-  <a href="/incidents/new" class="btn btn-danger">+ Log Incident</a>
+  <a href="/incidents/new" class="btn btn-danger">I Broke It</a>
 </div>
 
 <form id="filter-form"
@@ -17,33 +17,48 @@
   hx-trigger="change, keyup delay:400ms from:[name=q]"
   hx-sync="this:replace"
   class="filter-bar">
+
   <input
     type="text"
     name="q"
     value="{{ q }}"
-    placeholder="Search by title..."
+    placeholder="Search the carnage..."
     class="filter-input">
-  <input
-    type="date"
-    name="date_from"
-    value="{{ date_from }}"
-    title="From date"
-    class="filter-date">
-  <input
-    type="date"
-    name="date_to"
-    value="{{ date_to }}"
-    title="To date"
-    class="filter-date">
-  <select name="team" class="filter-select">
+
+  <select name="user_id" class="filter-ctrl">
+    <option value="0" {{ 'selected' if selected_user_id == 0 else '' }}>All users</option>
+    {% for user in users %}
+    <option value="{{ user.id }}" {{ 'selected' if user.id == selected_user_id else '' }}>{{ user.name }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="team" class="filter-ctrl">
     <option value="">All teams</option>
     {% for team in teams %}
     <option value="{{ team }}" {{ 'selected' if team == selected_team else '' }}>{{ team }}</option>
     {% endfor %}
   </select>
-  {% if q or date_from or date_to or selected_team %}
-  <a href="/incidents" class="btn btn-secondary">Clear</a>
+
+  <select name="timeframe" class="filter-ctrl">
+    <option value=""      {{ 'selected' if timeframe == ''      else '' }}>All time</option>
+    <option value="today" {{ 'selected' if timeframe == 'today' else '' }}>Today</option>
+    <option value="week"  {{ 'selected' if timeframe == 'week'  else '' }}>Last 7 days</option>
+    <option value="30d"   {{ 'selected' if timeframe == '30d'   else '' }}>Last 30 days</option>
+    <option value="month" {{ 'selected' if timeframe == 'month' else '' }}>This month</option>
+    <option value="year"  {{ 'selected' if timeframe == 'year'  else '' }}>This year</option>
+  </select>
+
+  <input
+    type="date"
+    name="date_exact"
+    value="{{ date_exact }}"
+    title="Exact day"
+    class="filter-ctrl filter-ctrl--date">
+
+  {% if q or selected_user_id or timeframe or date_exact or selected_team %}
+  <a href="/incidents" class="btn btn-secondary filter-clear">Clear</a>
   {% endif %}
+
 </form>
 
 <div class="table-container">

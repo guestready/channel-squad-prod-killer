@@ -1,6 +1,6 @@
 import calendar
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -40,6 +40,22 @@ def get_funny_title(count: int) -> str:
     if count <= 19:
         return "Living Legend of Broken Prod"
     return "The Nuclear Option"
+
+
+def resolve_timeframe(timeframe: str) -> tuple[str, str]:
+    """Return (date_from, date_to) ISO strings for a named period, or empty strings."""
+    now = datetime.utcnow()
+    if timeframe == "today":
+        return now.strftime("%Y-%m-%d"), ""
+    if timeframe == "week":
+        return (now - timedelta(days=7)).strftime("%Y-%m-%d"), ""
+    if timeframe == "month":
+        return now.replace(day=1).strftime("%Y-%m-%d"), ""
+    if timeframe == "30d":
+        return (now - timedelta(days=30)).strftime("%Y-%m-%d"), ""
+    if timeframe == "year":
+        return now.replace(month=1, day=1).strftime("%Y-%m-%d"), ""
+    return "", ""
 
 
 def get_funny_team_title(count: int) -> str:
@@ -93,22 +109,30 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
 async def incidents_list(
     request: Request,
     q: str = "",
-    date_from: str = "",
-    date_to: str = "",
+    user_id: int = 0,
+    timeframe: str = "",
+    date_exact: str = "",
     team: str = "",
     db: Session = Depends(get_db),
 ):
-    incidents = crud.search_incidents(db, q=q, date_from=date_from, date_to=date_to, team=team)
+    if date_exact:
+        date_from, date_to = date_exact, date_exact
+    else:
+        date_from, date_to = resolve_timeframe(timeframe)
+    incidents = crud.search_incidents(db, q=q, user_id=user_id, date_from=date_from, date_to=date_to, team=team)
     teams = crud.get_teams(db)
+    users = crud.get_users(db)
     return templates.TemplateResponse(
         "incidents/list.html",
         {
             "request": request,
             "incidents": incidents,
             "teams": teams,
+            "users": users,
             "q": q,
-            "date_from": date_from,
-            "date_to": date_to,
+            "selected_user_id": user_id,
+            "timeframe": timeframe,
+            "date_exact": date_exact,
             "selected_team": team,
         },
     )
@@ -118,12 +142,17 @@ async def incidents_list(
 async def incidents_partial(
     request: Request,
     q: str = "",
-    date_from: str = "",
-    date_to: str = "",
+    user_id: int = 0,
+    timeframe: str = "",
+    date_exact: str = "",
     team: str = "",
     db: Session = Depends(get_db),
 ):
-    incidents = crud.search_incidents(db, q=q, date_from=date_from, date_to=date_to, team=team)
+    if date_exact:
+        date_from, date_to = date_exact, date_exact
+    else:
+        date_from, date_to = resolve_timeframe(timeframe)
+    incidents = crud.search_incidents(db, q=q, user_id=user_id, date_from=date_from, date_to=date_to, team=team)
     return templates.TemplateResponse(
         "partials/incidents_table.html",
         {"request": request, "incidents": incidents},
