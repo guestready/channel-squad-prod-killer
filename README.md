@@ -99,6 +99,8 @@ All config is via environment variables (or a `.env` file in the project root).
 
 ## Funny Titles
 
+### Individual
+
 | Incidents | Title |
 |---|---|
 | 0 | Production Guardian |
@@ -111,7 +113,30 @@ All config is via environment variables (or a `.env` file in the project root).
 | 7–8 | Staff Apocalypse Engineer |
 | 9–12 | Legendary Production Destroyer |
 | 13–19 | Living Legend of Broken Prod |
-| 20+ | The Nuclear Option |
+| 20–29 | The Nuclear Option |
+| 30–39 | Extinction-Level Engineer |
+| 40–49 | Distinguished Fellow of Catastrophe |
+| 50–74 | Chaos Emeritus |
+| 75–99 | Grand Architect of Downtime |
+| 100–149 | Immortal Destroyer of SLAs |
+| 150–199 | The One Who Must Not Deploy |
+| 200+ | Production's Final Boss |
+
+### Team
+
+| Team Incidents | Title |
+|---|---|
+| 0–2 | Mostly Harmless |
+| 3–5 | Known Troublemakers |
+| 6–10 | Certified Chaos Unit |
+| 11–20 | Elite Destruction Division |
+| 21–30 | Most Killer Team |
+| 31–50 | The Architects of Doom |
+| 51–75 | Unstoppable Force of Nature |
+| 76–100 | Designated Disaster Response Team |
+| 101–150 | The Scorched Earth Division |
+| 151–200 | Hall of Flame |
+| 200+ | The Final Incident |
 
 ---
 
