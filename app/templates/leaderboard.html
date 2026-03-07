@@ -1,21 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Most Wanted — prod-killer{% endblock %}
 
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <h1>Most Wanted</h1>
   <p>Ranked by their contributions to collective suffering.</p>
 </div>
 
+<div class="chart-container">
+  <h2>Crimes Over Time</h2>
+  <canvas id="incidentChart" height="80"></canvas>
+</div>
+
 <div class="lb-tab-row">
   <div class="tab-bar">
-    <button class="tab {{ 'active' if view == 'individuals' else '' }}" data-view="individuals" onclick="setView(this)">Individuals</button>
-    <button class="tab {{ 'active' if view == 'teams' else '' }}" data-view="teams" onclick="setView(this)">Teams</button>
+    <button class="tab {{ 'active' if view == 'individuals' else '' }}" data-view="individuals" onclick="setView(this)">Lone Wolves</button>
+    <button class="tab {{ 'active' if view == 'teams' else '' }}" data-view="teams" onclick="setView(this)">Syndicates</button>
   </div>
   <div class="tab-bar">
     <button class="tab {{ 'active' if period == 'monthly' else '' }}" data-period="monthly" onclick="setPeriod(this)">This Month</button>
     <button class="tab {{ 'active' if period == 'yearly' else '' }}" data-period="yearly" onclick="setPeriod(this)">This Year</button>
-    <button class="tab {{ 'active' if period == 'alltime' else '' }}" data-period="alltime" onclick="setPeriod(this)">All Time</button>
+    <button class="tab {{ 'active' if period == 'alltime' else '' }}" data-period="alltime" onclick="setPeriod(this)">Hall of Shame</button>
   </div>
 </div>
 
@@ -33,8 +42,54 @@
   const _periodLabels = {
     monthly: _now.toLocaleString('en', { month: 'long', year: 'numeric' }),
     yearly: String(_now.getFullYear()),
-    alltime: 'All Time',
+    alltime: 'Hall of Shame',
   };
+
+  let _chart = null;
+
+  function _buildChart(labels, data) {
+    const canvas = document.getElementById('incidentChart');
+    if (_chart) { _chart.destroy(); _chart = null; }
+    if (!labels.length) {
+      canvas.style.display = 'none';
+      return;
+    }
+    canvas.style.display = '';
+    _chart = new Chart(canvas.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Crimes',
+          data,
+          backgroundColor: 'rgba(229, 62, 62, 0.55)',
+          borderColor: '#e53e3e',
+          borderWidth: 1,
+          borderRadius: 3,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => ` ${c.parsed.y} crime${c.parsed.y !== 1 ? 's' : ''}` } }
+        },
+        scales: {
+          x: { ticks: { color: '#7a7f99' }, grid: { color: '#2d3143' } },
+          y: { beginAtZero: true, suggestedMax: Math.max(...data, 0) + Math.max(Math.ceil(Math.max(...data, 0) * 0.2), 2), ticks: { precision: 0, color: '#7a7f99' }, grid: { color: '#2d3143' } }
+        }
+      }
+    });
+  }
+
+  function _reloadChart() {
+    fetch(`/leaderboard/chart?period=${currentPeriod}`)
+      .then(r => r.json())
+      .then(d => _buildChart(d.labels, d.data));
+  }
+
+  // Initial render using server-provided data
+  _buildChart({{ chart_labels | safe }}, {{ chart_data | safe }});
 
   function setView(el) {
     document.querySelectorAll('[data-view]').forEach(t => t.classList.remove('active'));
@@ -49,6 +104,7 @@
     currentPeriod = el.dataset.period;
     document.getElementById('lb-period').textContent = _periodLabels[currentPeriod] || '';
     loadLb();
+    _reloadChart();
   }
 
   function loadLb() {

@@ -15,15 +15,12 @@
       <span class="nav-tagline">your team's hall of shame</span>
     </div>
     <ul class="nav-links">
-      <li><a href="/" class="{{ 'active' if request.url.path == '/' else '' }}">War Room</a></li>
-      <li><a href="/incidents" class="{{ 'active' if request.url.path.startswith('/incidents') and request.url.path != '/incidents/new' else '' }}">Crime Log</a></li>
+      <li><a href="/" class="{{ 'active' if request.url.path == '/' or (request.url.path.startswith('/incidents') and request.url.path != '/incidents/new') else '' }}">War Room</a></li>
+      <li><a href="/leaderboard" class="{{ 'active' if request.url.path.startswith('/leaderboard') or request.url.path.startswith('/stats') else '' }}">Most Wanted</a></li>
       <li><a href="/users" class="{{ 'active' if request.url.path.startswith('/users') else '' }}">Suspects</a></li>
-      <li><a href="/leaderboard" class="{{ 'active' if request.url.path.startswith('/leaderboard') else '' }}">Most Wanted</a></li>
-      <li><a href="/stats" class="{{ 'active' if request.url.path.startswith('/stats') else '' }}">Body Count</a></li>
-      <li><a href="/incidents/new" class="btn-nav-primary">I Broke It</a></li>
       <li>
-        <form method="POST" action="/logout" style="display:inline;">
-          <button type="submit" class="btn-logout">Sign Out</button>
+        <form id="logout-form" method="POST" action="/logout" style="display:inline;">
+          <button type="button" class="btn-logout" onclick="confirmAction('Abandoning your post? The crimes won\'t document themselves.', 'logout-form', 'Sign Out')">Sign Out</button>
         </form>
       </li>
     </ul>

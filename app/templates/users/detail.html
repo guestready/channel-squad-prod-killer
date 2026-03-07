@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ user.name }} — prod-killer{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h1>
+      {{ user.name }}
+      {% if user.nickname %}<span style="font-size:1rem; font-weight:400; color:var(--text-muted);">"{{ user.nickname }}"</span>{% endif %}
+    </h1>
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.4rem;">
+      <a href="/teams/{{ user.team | urlencode }}" class="badge badge-team" style="text-decoration:none;">{{ user.team }}</a>
+      <span class="funny-title" style="font-size:0.85rem;">{{ title }}</span>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:0.75rem;">
+    <a href="/users/{{ user.id }}/edit" class="btn btn-ghost">Edit</a>
+    <a href="/users" class="link-muted">&larr; Suspects</a>
+  </div>
+</div>
+
+<div style="display:flex; gap:1rem; margin-bottom:1.75rem; flex-wrap:wrap;">
+  <div class="form-card" style="flex:1; min-width:140px; text-align:center; padding:1.25rem;">
+    <div style="font-size:2rem; font-weight:700; color:var(--red);">{{ count }}</div>
+    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">total crimes</div>
+  </div>
+  <div class="form-card" style="flex:1; min-width:140px; text-align:center; padding:1.25rem;">
+    <div style="font-size:2rem; font-weight:700; color:var(--text-muted);">
+      {% if rank %}#{{ rank }}{% else %}—{% endif %}
+    </div>
+    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">all-time rank</div>
+  </div>
+</div>
+
+<h2 style="font-size:1rem; font-weight:600; margin-bottom:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Crime Record</h2>
+
+<div class="table-container">
+  {% if incidents %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>When</th>
+        <th>Title</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inc in incidents %}
+      <tr>
+        <td class="mono text-muted">#{{ inc.id }}</td>
+        <td class="mono text-muted">{{ inc.occurred_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><a href="/incidents/{{ inc.id }}">{{ inc.title }}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if total_pages > 1 %}
+  <div class="pagination">
+    {% if page > 1 %}
+    <a href="/users/{{ user.id }}?page={{ page - 1 }}" class="btn btn-secondary pagination-btn">&larr; Prev</a>
+    {% else %}
+    <span class="pagination-btn pagination-disabled">&larr; Prev</span>
+    {% endif %}
+    <span class="pagination-info">Page {{ page }} of {{ total_pages }}</span>
+    {% if page < total_pages %}
+    <a href="/users/{{ user.id }}?page={{ page + 1 }}" class="btn btn-secondary pagination-btn">Next &rarr;</a>
+    {% else %}
+    <span class="pagination-btn pagination-disabled">Next &rarr;</span>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-title">Clean record. For now.</div>
+    <p>No crimes logged. This is either suspicious or a miracle.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -5,8 +5,8 @@
   <thead>
     <tr>
       <th style="width:60px">Rank</th>
-      <th>Team</th>
-      <th>Incidents</th>
+      <th>Syndicate</th>
+      <th>Crimes</th>
       <th>Reputation</th>
     </tr>
   </thead>
@@ -19,16 +19,16 @@
         {% elif loop.index == 3 %}<span class="rank rank-3">#3</span>
         {% else %}<span class="rank">#{{ loop.index }}</span>{% endif %}
       </td>
-      <td><span class="badge badge-team">{{ team }}</span></td>
+      <td><a href="/teams/{{ team | urlencode }}" style="text-decoration:none;"><span class="badge badge-team">{{ team }}</span></a></td>
       <td><span class="badge badge-count">{{ count }}</span></td>
-      <td class="funny-title">{{ get_funny_team_title(count) }}</td>
+      <td class="funny-title">{{ get_funny_team_title(alltime_team_counts.get(team, count)) }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 {% else %}
 <div class="empty-state">
-  <div class="empty-title">No team incidents this period</div>
+  <div class="empty-title">No team crimes this period</div>
   <p>Production is safe. Suspicious.</p>
 </div>
 {% endif %}
@@ -40,9 +40,9 @@
   <thead>
     <tr>
       <th style="width:60px">Rank</th>
-      <th>Name</th>
-      <th>Team</th>
-      <th>Incidents</th>
+      <th>Culprit</th>
+      <th>Syndicate</th>
+      <th>Crimes</th>
       <th>Title</th>
     </tr>
   </thead>
@@ -56,19 +56,21 @@
         {% else %}<span class="rank">#{{ loop.index }}</span>{% endif %}
       </td>
       <td>
-        <div class="user-name">{{ user.name }}</div>
-        {% if user.nickname %}<div class="user-nick">"{{ user.nickname }}"</div>{% endif %}
+        <a href="/users/{{ user.id }}" style="text-decoration:none;">
+          <div class="user-name">{{ user.name }}</div>
+          {% if user.nickname %}<div class="user-nick">"{{ user.nickname }}"</div>{% endif %}
+        </a>
       </td>
-      <td><span class="badge badge-team">{{ user.team }}</span></td>
+      <td><a href="/teams/{{ user.team | urlencode }}" style="text-decoration:none;"><span class="badge badge-team">{{ user.team }}</span></a></td>
       <td><span class="badge badge-count">{{ count }}</span></td>
-      <td class="funny-title">{{ get_funny_title(count) }}</td>
+      <td class="funny-title">{{ get_funny_title(alltime_user_counts.get(user.id, count)) }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 {% else %}
 <div class="empty-state">
-  <div class="empty-title">No incidents this period</div>
+  <div class="empty-title">No crimes this period</div>
   <p>Production is safe. Suspicious.</p>
 </div>
 {% endif %}

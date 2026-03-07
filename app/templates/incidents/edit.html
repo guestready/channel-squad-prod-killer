@@ -2,10 +2,11 @@
 {% block title %}Edit #{{ incident.id }} — prod-killer{% endblock %}
 
 {% block content %}
+<div class="page-narrow-lg">
 <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
   <div>
     <h1>Tamper with Evidence</h1>
-    <p>Rewriting history for incident #{{ incident.id }}. Bold.</p>
+    <p>Rewriting history for crime #{{ incident.id }}. Bold.</p>
   </div>
   <a href="/incidents/{{ incident.id }}" class="link-muted">&larr; Back</a>
 </div>
@@ -15,7 +16,7 @@
 
     <div class="form-row">
       <div class="form-group">
-        <label for="user_id">Who did this?</label>
+        <label for="user_id">Who broke prod?</label>
         <select name="user_id" id="user_id" required>
           {% for user in users %}
           <option value="{{ user.id }}" {{ 'selected' if user.id == incident.user_id else '' }}>{{ user.name }} ({{ user.team }})</option>
@@ -23,40 +24,40 @@
         </select>
       </div>
       <div class="form-group">
-        <label for="occurred_at">When did it happen?</label>
+        <label for="occurred_at">When did the chaos unfold?</label>
         <input type="datetime-local" name="occurred_at" id="occurred_at" required
           value="{{ incident.occurred_at.strftime('%Y-%m-%dT%H:%M') }}">
       </div>
     </div>
 
     <div class="form-group">
-      <label for="title">Title</label>
+      <label for="title">What happened?</label>
       <input type="text" name="title" id="title" required maxlength="200" value="{{ incident.title }}">
     </div>
 
     <div class="form-group">
-      <label for="description">What happened?</label>
+      <label for="description">Describe your crime</label>
       <textarea name="description" id="description" rows="4" required>{{ incident.description }}</textarea>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label for="discovered_by">How was it discovered?</label>
+        <label for="discovered_by">How did we find out?</label>
         <textarea name="discovered_by" id="discovered_by" rows="2" required>{{ incident.discovered_by }}</textarea>
       </div>
       <div class="form-group">
-        <label for="resolved_by">How was it resolved?</label>
+        <label for="resolved_by">How did we fix it?</label>
         <textarea name="resolved_by" id="resolved_by" rows="2" required>{{ incident.resolved_by }}</textarea>
       </div>
     </div>
 
     <div class="form-group">
-      <label for="helpers">Who helped? <span class="label-optional">(optional)</span></label>
+      <label for="helpers">Who helped clean up the mess? <span class="label-optional">(optional)</span></label>
       <input type="text" name="helpers" id="helpers" value="{{ incident.helpers or '' }}">
     </div>
 
     <div class="form-group">
-      <label for="links">Relevant links <span class="label-optional">(optional)</span></label>
+      <label for="links">Evidence<span class="label-optional">(optional)</span></label>
       <textarea name="links" id="links" rows="3">{{ incident.links or '' }}</textarea>
     </div>
 
@@ -65,5 +66,6 @@
       <a href="/incidents/{{ incident.id }}" class="btn btn-secondary">Cancel</a>
     </div>
   </form>
+</div>
 </div>
 {% endblock %}

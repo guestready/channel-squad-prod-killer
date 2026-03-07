@@ -29,6 +29,37 @@ def get_user(db: Session, user_id: int) -> models.User | None:
     return db.query(models.User).filter(models.User.id == user_id).first()
 
 
+def get_user_with_count(db: Session, user_id: int) -> tuple | None:
+    return (
+        db.query(models.User, func.count(models.Incident.id).label("count"))
+        .outerjoin(models.Incident, models.User.id == models.Incident.user_id)
+        .filter(models.User.id == user_id)
+        .group_by(models.User.id)
+        .first()
+    )
+
+
+def get_team_members_with_counts(db: Session, team: str) -> list[tuple]:
+    return (
+        db.query(models.User, func.count(models.Incident.id).label("count"))
+        .outerjoin(models.Incident, models.User.id == models.Incident.user_id)
+        .filter(models.User.team == team)
+        .group_by(models.User.id)
+        .order_by(func.count(models.Incident.id).desc())
+        .all()
+    )
+
+
+def get_team_incident_count(db: Session, team: str) -> int:
+    return (
+        db.query(func.count(models.Incident.id))
+        .join(models.User, models.Incident.user_id == models.User.id)
+        .filter(models.User.team == team)
+        .scalar()
+        or 0
+    )
+
+
 def create_user(db: Session, name: str, team: str, nickname: str | None = None) -> models.User:
     user = models.User(name=name, team=team, nickname=nickname or None)
     db.add(user)
@@ -71,6 +102,31 @@ def get_incidents(db: Session, limit: int = 100, offset: int = 0) -> list[models
     )
 
 
+def count_search_incidents(
+    db: Session,
+    q: str = "",
+    user_id: int = 0,
+    date_from: str = "",
+    date_to: str = "",
+    team: str = "",
+) -> int:
+    query = (
+        db.query(func.count(models.Incident.id))
+        .join(models.User, models.Incident.user_id == models.User.id)
+    )
+    if q:
+        query = query.filter(models.Incident.title.ilike(f"%{q}%"))
+    if user_id:
+        query = query.filter(models.Incident.user_id == user_id)
+    if date_from:
+        query = query.filter(models.Incident.occurred_at >= datetime.fromisoformat(date_from))
+    if date_to:
+        query = query.filter(models.Incident.occurred_at <= datetime.fromisoformat(date_to + "T23:59:59"))
+    if team:
+        query = query.filter(models.User.team == team)
+    return query.scalar() or 0
+
+
 def search_incidents(
     db: Session,
     q: str = "",
@@ -78,7 +134,8 @@ def search_incidents(
     date_from: str = "",
     date_to: str = "",
     team: str = "",
-    limit: int = 200,
+    limit: int = 25,
+    offset: int = 0,
 ) -> list[models.Incident]:
     query = (
         db.query(models.Incident)
@@ -96,7 +153,7 @@ def search_incidents(
         query = query.filter(models.Incident.occurred_at <= datetime.fromisoformat(date_to + "T23:59:59"))
     if team:
         query = query.filter(models.User.team == team)
-    return query.limit(limit).all()
+    return query.offset(offset).limit(limit).all()
 
 
 def get_incident(db: Session, incident_id: int) -> models.Incident | None:
@@ -299,3 +356,34 @@ def get_monthly_incident_counts(db: Session) -> list[dict]:
         .all()
     )
     return [{"year": int(r.year), "month": int(r.month), "count": int(r.count)} for r in results]
+
+
+def get_yearly_incident_counts(db: Session, year: int) -> list[dict]:
+    results = (
+        db.query(
+            extract("month", models.Incident.occurred_at).label("month"),
+            func.count(models.Incident.id).label("count"),
+        )
+        .filter(extract("year", models.Incident.occurred_at) == year)
+        .group_by("month")
+        .order_by("month")
+        .all()
+    )
+    return [{"month": int(r.month), "count": int(r.count)} for r in results]
+
+
+def get_daily_incident_counts(db: Session, year: int, month: int) -> list[dict]:
+    results = (
+        db.query(
+            extract("day", models.Incident.occurred_at).label("day"),
+            func.count(models.Incident.id).label("count"),
+        )
+        .filter(
+            extract("year", models.Incident.occurred_at) == year,
+            extract("month", models.Incident.occurred_at) == month,
+        )
+        .group_by("day")
+        .order_by("day")
+        .all()
+    )
+    return [{"day": int(r.day), "count": int(r.count)} for r in results]

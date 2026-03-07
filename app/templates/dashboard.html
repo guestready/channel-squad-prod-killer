@@ -2,14 +2,21 @@
 {% block title %}War Room — prod-killer{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <h1>War Room</h1>
-  <p>A living monument to human error.</p>
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+  <div>
+    <h1>War Room</h1>
+    <p>A living monument to human error.</p>
+  </div>
+  <a href="/incidents/new" class="btn btn-danger">I Broke It</a>
 </div>
+
+{% if just_deleted %}
+<div class="alert alert-warn">Crime redacted. We all know what really happened.</div>
+{% endif %}
 
 <div class="stat-grid">
   <div class="stat-card">
-    <div class="label">Total Incidents</div>
+    <div class="label">Total Crimes</div>
     <div class="value">{{ total }}</div>
     <div class="sub">all time</div>
   </div>
@@ -24,66 +31,74 @@
     <div class="sub">and counting</div>
   </div>
   <div class="stat-card">
-    <div class="label">Teams Involved</div>
+    <div class="label">Active Syndicates</div>
     <div class="value">{{ teams }}</div>
     <div class="sub">none are innocent</div>
   </div>
   {% if top_offender %}
   <div class="stat-card stat-card--highlight">
     <div class="label">Most Wanted (this month)</div>
-    <div class="value-name">{{ top_offender[0].name }}</div>
-    <div class="sub">{{ top_offender[1] }} incident{{ 's' if top_offender[1] != 1 else '' }} &mdash; {{ top_offender[0].team }}</div>
+    <div class="value-name">
+      <a href="/users/{{ top_offender[0].id }}" style="text-decoration:none; color:inherit;">{{ top_offender[0].name }}</a>
+    </div>
+    <div class="sub">{{ top_offender[1] }} crime{{ 's' if top_offender[1] != 1 else '' }} &mdash;
+      <a href="/teams/{{ top_offender[0].team | urlencode }}" style="text-decoration:none; color:inherit;">{{ top_offender[0].team }}</a>
+    </div>
   </div>
   {% endif %}
 </div>
 
+<form id="filter-form"
+  hx-get="/incidents/partial"
+  hx-target="#incidents-table"
+  hx-swap="innerHTML"
+  hx-trigger="change, keyup delay:400ms from:[name=q]"
+  hx-sync="this:replace"
+  class="filter-bar">
+
+  <input
+    type="text"
+    name="q"
+    value="{{ q }}"
+    placeholder="Search the crimes..."
+    class="filter-input">
+
+  <select name="user_id" class="filter-ctrl">
+    <option value="0" {{ 'selected' if selected_user_id == 0 else '' }}>All Suspects</option>
+    {% for user in users %}
+    <option value="{{ user.id }}" {{ 'selected' if user.id == selected_user_id else '' }}>{{ user.name }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="team" class="filter-ctrl">
+    <option value="">All Syndicates</option>
+    {% for team in teams_list %}
+    <option value="{{ team }}" {{ 'selected' if team == selected_team else '' }}>{{ team }}</option>
+    {% endfor %}
+  </select>
+
+  <div class="filter-date-group">
+    <label class="date-range-field">
+      <span class="date-range-lbl">From</span>
+      <input type="date" name="date_from" value="{{ date_from }}" class="filter-ctrl--date">
+    </label>
+    <label class="date-range-field">
+      <span class="date-range-lbl">To</span>
+      <input type="date" name="date_to" value="{{ date_to }}" class="filter-ctrl--date">
+    </label>
+  </div>
+
+  {% if q or selected_user_id or date_from or date_to or selected_team %}
+  <a href="/" class="btn btn-secondary filter-clear">Clear</a>
+  {% endif %}
+
+</form>
+
 <div class="table-container">
-  <div class="table-header">
-    <h2>Recent Incidents</h2>
-    <a href="/incidents" class="link-muted">View all &rarr;</a>
+  <div id="incidents-table">
+    {% include "partials/incidents_table.html" %}
   </div>
-  {% if recent_incidents %}
-  <table>
-    <thead>
-      <tr>
-        <th>When</th>
-        <th>Title</th>
-        <th>Perpetrator</th>
-        <th>Team</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for inc in recent_incidents %}
-      <tr>
-        <td class="mono text-muted">{{ inc.occurred_at.strftime('%Y-%m-%d %H:%M') }}</td>
-        <td><a href="/incidents/{{ inc.id }}">{{ inc.title }}</a></td>
-        <td>{{ inc.user.name }}</td>
-        <td><span class="badge badge-team">{{ inc.user.team }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% if total_pages > 1 %}
-  <div class="pagination">
-    {% if page > 1 %}
-    <a href="/?page={{ page - 1 }}" class="btn btn-secondary pagination-btn">&larr; Prev</a>
-    {% else %}
-    <span class="pagination-btn pagination-disabled">&larr; Prev</span>
-    {% endif %}
-    <span class="pagination-info">Page {{ page }} of {{ total_pages }}</span>
-    {% if page < total_pages %}
-    <a href="/?page={{ page + 1 }}" class="btn btn-secondary pagination-btn">Next &rarr;</a>
-    {% else %}
-    <span class="pagination-btn pagination-disabled">Next &rarr;</span>
-    {% endif %}
-  </div>
-  {% endif %}
-  {% else %}
-  <div class="empty-state">
-    <div class="empty-title">No incidents on record. Very suspicious.</div>
-    <p>Either your team is incredibly competent, or nobody's been honest yet.<br>
-    <a href="/incidents/new">Be the first to confess.</a></p>
-  </div>
-  {% endif %}
 </div>
 {% endblock %}
+
+{% block head %}{% endblock %}

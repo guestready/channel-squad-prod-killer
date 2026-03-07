@@ -15,83 +15,56 @@
 <div class="alert alert-warn">Can't delete {{ blocked_user.name }}. They have documented crimes on record. History must stand.</div>
 {% endif %}
 
-<div class="page-header">
-  <h1>Suspects</h1>
-  <p>Known associates. Handle with suspicion.</p>
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+  <div>
+    <h1>Suspects</h1>
+    <p>Known associates. Handle with suspicion.</p>
+  </div>
+  <a href="/users/new" class="btn btn-danger">Add Suspect</a>
 </div>
 
-<div class="grid-2" style="align-items: start;">
-  <div>
-    <div class="table-container">
-      {% if users %}
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Team</th>
-            <th>Incidents</th>
-            <th>Title</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for user, count in users %}
-          <tr>
-            <td>
-              <div class="user-name">{{ user.name }}</div>
-              {% if user.nickname %}<div class="user-nick">"{{ user.nickname }}"</div>{% endif %}
-            </td>
-            <td><span class="badge badge-team">{{ user.team }}</span></td>
-            <td><span class="badge badge-count">{{ count }}</span></td>
-            <td class="funny-title">{{ get_funny_title(count) }}</td>
-            <td style="white-space:nowrap;">
-              <a href="/users/{{ user.id }}/edit" class="btn btn-ghost">Edit</a>
-              <form id="delete-user-{{ user.id }}" method="POST" action="/users/{{ user.id }}/delete" style="display:inline;">
-                <button type="button" class="btn btn-ghost-danger"
-                  onclick="confirmAction('Erase {{ user.name }} from the records? Their crimes will remain on file forever.', 'delete-user-{{ user.id }}', 'Erase them')">
-                  Delete
-                </button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="empty-state">
-        <div class="empty-title">No users yet</div>
-        <p>Add your team members to start tracking their crimes.</p>
-      </div>
-      {% endif %}
-    </div>
+<div class="table-container">
+  {% if users %}
+  <table>
+    <thead>
+      <tr>
+        <th>Suspect</th>
+        <th>Syndicate</th>
+        <th>Crimes</th>
+        <th>Title</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user, count in users %}
+      <tr>
+        <td>
+          <a href="/users/{{ user.id }}" style="text-decoration:none;">
+            <div class="user-name">{{ user.name }}</div>
+            {% if user.nickname %}<div class="user-nick">"{{ user.nickname }}"</div>{% endif %}
+          </a>
+        </td>
+        <td><a href="/teams/{{ user.team | urlencode }}" style="text-decoration:none;"><span class="badge badge-team">{{ user.team }}</span></a></td>
+        <td><span class="badge badge-count">{{ count }}</span></td>
+        <td class="funny-title">{{ get_funny_title(count) }}</td>
+        <td style="white-space:nowrap;">
+          <a href="/users/{{ user.id }}/edit" class="btn btn-ghost">Edit</a>
+          <form id="delete-user-{{ user.id }}" method="POST" action="/users/{{ user.id }}/delete" style="display:inline;">
+            <button type="button" class="btn btn-ghost-danger"
+              onclick="confirmAction('Erase {{ user.name }} from the records? Their crimes will remain on file forever.', 'delete-user-{{ user.id }}', 'Erase them')">
+              Delete
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-title">No users yet</div>
+    <p>Add your team members to start tracking their crimes.</p>
   </div>
-
-  <div>
-    <div class="form-card">
-      <h2 style="font-size:1rem; font-weight:600; margin-bottom:1.25rem;">Add User</h2>
-      <form method="POST" action="/users">
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input type="text" name="name" id="name" placeholder="Full name" required maxlength="100">
-        </div>
-        <div class="form-group">
-          <label for="team">Team</label>
-          <input type="text" name="team" id="team" list="teams-list" placeholder="e.g. Backend, Platform, Data" required maxlength="100">
-          <datalist id="teams-list">
-            {% for team in teams %}
-            <option value="{{ team }}">
-            {% endfor %}
-          </datalist>
-        </div>
-        <div class="form-group">
-          <label for="nickname">Nickname <span class="label-optional">(optional)</span></label>
-          <input type="text" name="nickname" id="nickname" placeholder="e.g. The Destroyer" maxlength="100">
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn btn-danger">Add User</button>
-        </div>
-      </form>
-    </div>
-  </div>
+  {% endif %}
 </div>
 {% endblock %}

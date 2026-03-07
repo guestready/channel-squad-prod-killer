@@ -7,7 +7,7 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -231,42 +231,11 @@ templates.env.globals["get_funny_team_title"] = get_funny_team_title
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 
 _DASHBOARD_PER_PAGE = 25
+_INCIDENTS_PER_PAGE = 25
 
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request, page: int = 1, db: Session = Depends(get_db)):
-    now = datetime.utcnow()
-    total = crud.count_incidents(db)
-    total_pages = max(1, -(-total // _DASHBOARD_PER_PAGE))  # ceil division
-    page = max(1, min(page, total_pages))
-    offset = (page - 1) * _DASHBOARD_PER_PAGE
-    recent = crud.get_incidents(db, limit=_DASHBOARD_PER_PAGE, offset=offset)
-    this_month = crud.count_incidents_this_month(db)
-    this_year = crud.count_incidents_this_year(db)
-    teams = crud.count_teams(db)
-    monthly_lb = crud.get_monthly_leaderboard(db, now.year, now.month)
-    top_offender = monthly_lb[0] if monthly_lb else None
-
-    return templates.TemplateResponse(
-        "dashboard.html",
-        {
-            "request": request,
-            "recent_incidents": recent,
-            "total": total,
-            "this_month": this_month,
-            "this_year": this_year,
-            "teams": teams,
-            "top_offender": top_offender,
-            "page": page,
-            "total_pages": total_pages,
-        },
-    )
-
-
-# ── Incidents ─────────────────────────────────────────────────────────────────
-
-@app.get("/incidents", response_class=HTMLResponse)
-async def incidents_list(
+async def dashboard(
     request: Request,
     q: str = "",
     user_id: int = 0,
@@ -274,19 +243,40 @@ async def incidents_list(
     date_to: str = "",
     team: str = "",
     deleted: int = 0,
+    page: int = 1,
     db: Session = Depends(get_db),
 ):
-    incidents = crud.search_incidents(db, q=q, user_id=user_id, date_from=date_from, date_to=date_to, team=team)
-    teams = crud.get_teams(db)
+    now = datetime.utcnow()
+    this_month = crud.count_incidents_this_month(db)
+    this_year = crud.count_incidents_this_year(db)
+    teams_count = crud.count_teams(db)
+    monthly_lb = crud.get_monthly_leaderboard(db, now.year, now.month)
+    top_offender = monthly_lb[0] if monthly_lb else None
+
+    total = crud.count_search_incidents(db, q=q, user_id=user_id, date_from=date_from, date_to=date_to, team=team)
+    total_pages = max(1, -(-total // _INCIDENTS_PER_PAGE))
+    page = max(1, min(page, total_pages))
+    offset = (page - 1) * _INCIDENTS_PER_PAGE
+    incidents = crud.search_incidents(db, q=q, user_id=user_id, date_from=date_from, date_to=date_to, team=team, limit=_INCIDENTS_PER_PAGE, offset=offset)
     users = crud.get_users(db)
+    teams = crud.get_teams(db)
+
     return templates.TemplateResponse(
-        "incidents/list.html",
+        "dashboard.html",
         {
             "request": request,
             "incidents": incidents,
-            "teams": teams,
+            "total": total,
+            "this_month": this_month,
+            "this_year": this_year,
+            "teams": teams_count,
+            "top_offender": top_offender,
+            "page": page,
+            "total_pages": total_pages,
             "users": users,
+            "teams_list": teams,
             "q": q,
+            "user_id": user_id,
             "selected_user_id": user_id,
             "date_from": date_from,
             "date_to": date_to,
@@ -294,6 +284,16 @@ async def incidents_list(
             "just_deleted": bool(deleted),
         },
     )
+
+
+# ── Incidents ─────────────────────────────────────────────────────────────────
+
+@app.get("/incidents", response_class=HTMLResponse)
+async def incidents_list(request: Request, deleted: int = 0):
+    url = "/"
+    if deleted:
+        url += "?deleted=1"
+    return RedirectResponse(url, status_code=302)
 
 
 @app.get("/incidents/partial", response_class=HTMLResponse)
@@ -304,12 +304,27 @@ async def incidents_partial(
     date_from: str = "",
     date_to: str = "",
     team: str = "",
+    page: int = 1,
     db: Session = Depends(get_db),
 ):
-    incidents = crud.search_incidents(db, q=q, user_id=user_id, date_from=date_from, date_to=date_to, team=team)
+    total = crud.count_search_incidents(db, q=q, user_id=user_id, date_from=date_from, date_to=date_to, team=team)
+    total_pages = max(1, -(-total // _INCIDENTS_PER_PAGE))
+    page = max(1, min(page, total_pages))
+    offset = (page - 1) * _INCIDENTS_PER_PAGE
+    incidents = crud.search_incidents(db, q=q, user_id=user_id, date_from=date_from, date_to=date_to, team=team, limit=_INCIDENTS_PER_PAGE, offset=offset)
     return templates.TemplateResponse(
         "partials/incidents_table.html",
-        {"request": request, "incidents": incidents},
+        {
+            "request": request,
+            "incidents": incidents,
+            "q": q,
+            "user_id": user_id,
+            "date_from": date_from,
+            "date_to": date_to,
+            "team": team,
+            "page": page,
+            "total_pages": total_pages,
+        },
     )
 
 
@@ -420,7 +435,7 @@ async def delete_incident(incident_id: int, db: Session = Depends(get_db)):
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
     crud.delete_incident(db, incident_id)
-    return RedirectResponse("/incidents?deleted=1", status_code=303)
+    return RedirectResponse("/?deleted=1", status_code=303)
 
 
 # ── Users ─────────────────────────────────────────────────────────────────────
@@ -447,6 +462,38 @@ async def users_list(
             "just_edited": bool(edited),
             "just_deleted": bool(deleted),
             "blocked_user": blocked_user,
+        },
+    )
+
+
+@app.get("/users/new", response_class=HTMLResponse)
+async def new_user_form(request: Request, db: Session = Depends(get_db)):
+    teams = crud.get_teams(db)
+    return templates.TemplateResponse("users/new.html", {"request": request, "teams": teams})
+
+
+@app.get("/users/{user_id}", response_class=HTMLResponse)
+async def user_detail(request: Request, user_id: int, page: int = 1, db: Session = Depends(get_db)):
+    result = crud.get_user_with_count(db, user_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="User not found")
+    user, count = result
+    total_pages = max(1, -(-count // _INCIDENTS_PER_PAGE))
+    page = max(1, min(page, total_pages))
+    incidents = crud.search_incidents(db, user_id=user_id, limit=_INCIDENTS_PER_PAGE, offset=(page - 1) * _INCIDENTS_PER_PAGE)
+    alltime = crud.get_alltime_leaderboard(db)
+    rank = next((i + 1 for i, (u, _) in enumerate(alltime) if u.id == user_id), None)
+    return templates.TemplateResponse(
+        "users/detail.html",
+        {
+            "request": request,
+            "user": user,
+            "count": count,
+            "incidents": incidents,
+            "rank": rank,
+            "title": get_funny_title(count),
+            "page": page,
+            "total_pages": total_pages,
         },
     )
 
@@ -499,6 +546,33 @@ async def delete_user(user_id: int, db: Session = Depends(get_db)):
     return RedirectResponse("/users?deleted=1", status_code=303)
 
 
+@app.get("/teams/{team}", response_class=HTMLResponse)
+async def team_detail(request: Request, team: str, page: int = 1, db: Session = Depends(get_db)):
+    members = crud.get_team_members_with_counts(db, team)
+    if not members:
+        raise HTTPException(status_code=404, detail="Team not found")
+    total_count = crud.get_team_incident_count(db, team)
+    total_pages = max(1, -(-total_count // _INCIDENTS_PER_PAGE))
+    page = max(1, min(page, total_pages))
+    incidents = crud.search_incidents(db, team=team, limit=_INCIDENTS_PER_PAGE, offset=(page - 1) * _INCIDENTS_PER_PAGE)
+    alltime = crud.get_alltime_team_leaderboard(db)
+    rank = next((i + 1 for i, (t, _) in enumerate(alltime) if t == team), None)
+    return templates.TemplateResponse(
+        "teams/detail.html",
+        {
+            "request": request,
+            "team": team,
+            "members": members,
+            "total_count": total_count,
+            "incidents": incidents,
+            "rank": rank,
+            "title": get_funny_team_title(total_count),
+            "page": page,
+            "total_pages": total_pages,
+        },
+    )
+
+
 # ── Leaderboard ───────────────────────────────────────────────────────────────
 
 def _build_lb_context(db, period: str, view: str, now) -> dict:
@@ -514,15 +588,55 @@ def _build_lb_context(db, period: str, view: str, now) -> dict:
         rankings = crud.get_monthly_leaderboard(db, now.year, now.month)
         team_rankings = crud.get_monthly_team_leaderboard(db, now.year, now.month)
         label = f"{calendar.month_name[now.month]} {now.year}"
-    return {"rankings": rankings, "team_rankings": team_rankings, "period": period, "view": view, "label": label}
+    alltime_user_counts = {u.id: c for u, c in crud.get_alltime_leaderboard(db)} if period != "alltime" else {u.id: c for u, c in rankings}
+    alltime_team_counts = {t: c for t, c in crud.get_alltime_team_leaderboard(db)} if period != "alltime" else {t: c for t, c in team_rankings}
+    return {
+        "rankings": rankings,
+        "team_rankings": team_rankings,
+        "period": period,
+        "view": view,
+        "label": label,
+        "alltime_user_counts": alltime_user_counts,
+        "alltime_team_counts": alltime_team_counts,
+    }
 
 
 @app.get("/leaderboard", response_class=HTMLResponse)
 async def leaderboard(
-    request: Request, period: str = "monthly", view: str = "individuals", db: Session = Depends(get_db)
+    request: Request, period: str = "alltime", view: str = "individuals", db: Session = Depends(get_db)
 ):
-    ctx = _build_lb_context(db, period, view, datetime.utcnow())
-    return templates.TemplateResponse("leaderboard.html", {"request": request, **ctx})
+    now = datetime.utcnow()
+    ctx = _build_lb_context(db, period, view, now)
+    monthly_data = crud.get_monthly_incident_counts(db)
+    chart_labels = json.dumps(
+        [f"{calendar.month_abbr[d['month']]} {d['year']}" for d in monthly_data]
+    )
+    chart_data = json.dumps([d["count"] for d in monthly_data])
+    return templates.TemplateResponse(
+        "leaderboard.html",
+        {"request": request, "chart_labels": chart_labels, "chart_data": chart_data, **ctx},
+    )
+
+
+@app.get("/leaderboard/chart")
+async def leaderboard_chart(period: str = "alltime", db: Session = Depends(get_db)):
+    now = datetime.utcnow()
+    if period == "monthly":
+        rows = crud.get_daily_incident_counts(db, now.year, now.month)
+        _, days_in_month = calendar.monthrange(now.year, now.month)
+        day_map = {r["day"]: r["count"] for r in rows}
+        labels = [str(d) for d in range(1, days_in_month + 1)]
+        data = [day_map.get(d, 0) for d in range(1, days_in_month + 1)]
+    elif period == "yearly":
+        rows = crud.get_yearly_incident_counts(db, now.year)
+        month_map = {r["month"]: r["count"] for r in rows}
+        labels = [calendar.month_abbr[m] for m in range(1, 13)]
+        data = [month_map.get(m, 0) for m in range(1, 13)]
+    else:
+        rows = crud.get_monthly_incident_counts(db)
+        labels = [f"{calendar.month_abbr[r['month']]} {r['year']}" for r in rows]
+        data = [r["count"] for r in rows]
+    return JSONResponse({"labels": labels, "data": data})
 
 
 @app.get("/leaderboard/partial", response_class=HTMLResponse)
@@ -536,21 +650,7 @@ async def leaderboard_partial(
 # ── Stats ─────────────────────────────────────────────────────────────────────
 
 @app.get("/stats", response_class=HTMLResponse)
-async def stats(request: Request, db: Session = Depends(get_db)):
-    users_stats = crud.get_users_with_counts(db)
-    team_stats = crud.get_team_stats(db)
-    monthly_data = crud.get_monthly_incident_counts(db)
-    chart_labels = json.dumps(
-        [f"{calendar.month_abbr[d['month']]} {d['year']}" for d in monthly_data]
-    )
-    chart_data = json.dumps([d["count"] for d in monthly_data])
-    return templates.TemplateResponse(
-        "stats.html",
-        {
-            "request": request,
-            "users_stats": users_stats,
-            "team_stats": team_stats,
-            "chart_labels": chart_labels,
-            "chart_data": chart_data,
-        },
-    )
+async def stats(request: Request):
+    return RedirectResponse("/leaderboard", status_code=302)
+
+

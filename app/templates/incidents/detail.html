@@ -25,7 +25,7 @@
     "The monitoring team has been notified. They are not happy.",
     "Bold strategy. Let's see if it pays off.",
     "Have you tried turning it off and on again?",
-    "This incident will be referenced in future onboarding.",
+    "This crime will be referenced in future onboarding.",
     "Somewhere, a SRE is crying.",
     "New personal record. Or is it?",
     "Your teammates are typing... very aggressively.",
@@ -59,24 +59,24 @@
 
 <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
   <div>
-    <div class="incident-number">Incident #{{ incident.id }}</div>
+    <div class="incident-number">Crime #{{ incident.id }}</div>
     <h1>{{ incident.title }}</h1>
     <div class="detail-meta">
       <span class="mono">{{ incident.occurred_at.strftime('%Y-%m-%d at %H:%M') }}</span>
       <span>&mdash;</span>
-      <span><strong>{{ incident.user.name }}</strong></span>
-      <span class="badge badge-team">{{ incident.user.team }}</span>
+      <a href="/users/{{ incident.user.id }}" style="text-decoration:none;"><strong>{{ incident.user.name }}</strong></a>
+      <a href="/teams/{{ incident.user.team | urlencode }}" style="text-decoration:none;"><span class="badge badge-team">{{ incident.user.team }}</span></a>
     </div>
   </div>
   <div style="display:flex; align-items:center; gap:0.5rem;">
     <a href="/incidents/{{ incident.id }}/edit" class="btn btn-ghost">Edit</a>
     <form id="delete-incident-{{ incident.id }}" method="POST" action="/incidents/{{ incident.id }}/delete">
       <button type="button" class="btn btn-ghost-danger"
-        onclick="confirmAction('Burn the evidence? This is legally dubious. The incident will be gone — the shame, eternal.', 'delete-incident-{{ incident.id }}', 'Burn it')">
+        onclick="confirmAction('Burn the evidence? This is legally dubious. The crime will be gone — the shame, eternal.', 'delete-incident-{{ incident.id }}', 'Burn it')">
         Delete
       </button>
     </form>
-    <a href="/incidents" class="link-muted" style="margin-left:0.5rem;">&larr; All incidents</a>
+    <a href="/incidents" class="link-muted" style="margin-left:0.5rem;">&larr; All crimes</a>
   </div>
 </div>
 
@@ -84,27 +84,27 @@
   <div class="report-grid">
 
     <div class="report-field report-field--full">
-      <div class="field-label">What happened</div>
+      <div class="field-label">Describe your crime</div>
       <div class="field-value">{{ incident.description }}</div>
     </div>
 
     <div class="report-field">
-      <div class="field-label">How it was discovered</div>
+      <div class="field-label">How did we find out?</div>
       <div class="field-value">{{ incident.discovered_by }}</div>
     </div>
 
     <div class="report-field">
-      <div class="field-label">How it was resolved</div>
+      <div class="field-label">How did we fix it?</div>
       <div class="field-value">{{ incident.resolved_by }}</div>
     </div>
 
     <div class="report-field">
-      <div class="field-label">Who helped fix it</div>
+      <div class="field-label">Who helped clean up the mess?</div>
       <div class="field-value">{{ incident.helpers or '—' }}</div>
     </div>
 
     <div class="report-field">
-      <div class="field-label">Relevant links</div>
+      <div class="field-label">Evidence</div>
       {% if incident.links %}
       <div class="field-value links-list">
         {% for link in incident.links.splitlines() %}

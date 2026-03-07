@@ -12,17 +12,17 @@
 </div>
 
 <div class="chart-container">
-  <h2>Incidents Over Time</h2>
+  <h2>Crimes Over Time</h2>
   {% if chart_labels != '[]' %}
-  <canvas id="incidentChart" height="80"></canvas>
+  <canvas id="crimeChart" height="80"></canvas>
   <script>
-    const ctx = document.getElementById('incidentChart').getContext('2d');
+    const ctx = document.getElementById('crimeChart').getContext('2d');
     new Chart(ctx, {
       type: 'bar',
       data: {
         labels: {{ chart_labels | safe }},
         datasets: [{
-          label: 'Incidents',
+          label: 'Crimes',
           data: {{ chart_data | safe }},
           backgroundColor: 'rgba(229, 62, 62, 0.55)',
           borderColor: '#e53e3e',
@@ -36,7 +36,7 @@
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: ctx => ` ${ctx.parsed.y} incident${ctx.parsed.y !== 1 ? 's' : ''}`
+              label: ctx => ` ${ctx.parsed.y} crime${ctx.parsed.y !== 1 ? 's' : ''}`
             }
           }
         },
@@ -56,7 +56,7 @@
   </script>
   {% else %}
   <div class="empty-state" style="padding:2rem;">
-    <p>No data yet. Log some incidents first.</p>
+    <p>No data yet. Log some crimes first.</p>
   </div>
   {% endif %}
 </div>
@@ -100,7 +100,7 @@
         <thead>
           <tr>
             <th>Team</th>
-            <th>Total Incidents</th>
+            <th>Total Crimes</th>
           </tr>
         </thead>
         <tbody>

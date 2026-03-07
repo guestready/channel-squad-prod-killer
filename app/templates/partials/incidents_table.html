@@ -6,7 +6,7 @@
       <th>When</th>
       <th>Title</th>
       <th>Perpetrator</th>
-      <th>Team</th>
+      <th>Syndicate</th>
     </tr>
   </thead>
   <tbody>
@@ -15,12 +15,30 @@
       <td class="mono text-muted">#{{ inc.id }}</td>
       <td class="mono text-muted">{{ inc.occurred_at.strftime('%Y-%m-%d %H:%M') }}</td>
       <td><a href="/incidents/{{ inc.id }}">{{ inc.title }}</a></td>
-      <td>{{ inc.user.name }}</td>
-      <td><span class="badge badge-team">{{ inc.user.team }}</span></td>
+      <td><a href="/users/{{ inc.user.id }}" style="text-decoration:none;" class="user-name">{{ inc.user.name }}</a></td>
+      <td><a href="/teams/{{ inc.user.team | urlencode }}" style="text-decoration:none;"><span class="badge badge-team">{{ inc.user.team }}</span></a></td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+{% if total_pages > 1 %}
+{% set base = "/incidents/partial?q=" ~ q ~ "&user_id=" ~ user_id ~ "&team=" ~ team ~ "&date_from=" ~ date_from ~ "&date_to=" ~ date_to %}
+<div class="pagination">
+  {% if page > 1 %}
+  <a hx-get="{{ base }}&page={{ page - 1 }}" hx-target="#incidents-table" hx-swap="innerHTML"
+     class="btn btn-secondary pagination-btn">&larr; Prev</a>
+  {% else %}
+  <span class="pagination-btn pagination-disabled">&larr; Prev</span>
+  {% endif %}
+  <span class="pagination-info">Page {{ page }} of {{ total_pages }}</span>
+  {% if page < total_pages %}
+  <a hx-get="{{ base }}&page={{ page + 1 }}" hx-target="#incidents-table" hx-swap="innerHTML"
+     class="btn btn-secondary pagination-btn">Next &rarr;</a>
+  {% else %}
+  <span class="pagination-btn pagination-disabled">Next &rarr;</span>
+  {% endif %}
+</div>
+{% endif %}
 {% else %}
 <div class="empty-state">
   <div class="empty-title">Nothing to see here. Suspicious.</div>
