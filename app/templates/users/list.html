@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Users — prod-killer{% endblock %}
+
+{% block content %}
+{% if just_created %}
+<div class="alert alert-success">User added. They will regret this.</div>
+{% endif %}
+
+<div class="page-header">
+  <h1>Users</h1>
+  <p>The suspects.</p>
+</div>
+
+<div class="grid-2" style="align-items: start;">
+  <div>
+    <div class="table-container">
+      {% if users %}
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Team</th>
+            <th>Incidents</th>
+            <th>Title</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user, count in users %}
+          <tr>
+            <td>
+              <div class="user-name">{{ user.name }}</div>
+              {% if user.nickname %}<div class="user-nick">"{{ user.nickname }}"</div>{% endif %}
+            </td>
+            <td><span class="badge badge-team">{{ user.team }}</span></td>
+            <td><span class="badge badge-count">{{ count }}</span></td>
+            <td class="funny-title">{{ get_funny_title(count) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-title">No users yet</div>
+        <p>Add your team members to start tracking their crimes.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    <div class="form-card">
+      <h2 style="font-size:1rem; font-weight:600; margin-bottom:1.25rem;">Add User</h2>
+      <form method="POST" action="/users">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" name="name" id="name" placeholder="Full name" required maxlength="100">
+        </div>
+        <div class="form-group">
+          <label for="team">Team</label>
+          <input type="text" name="team" id="team" placeholder="e.g. Backend, Platform, Data" required maxlength="100">
+        </div>
+        <div class="form-group">
+          <label for="nickname">Nickname <span class="label-optional">(optional)</span></label>
+          <input type="text" name="nickname" id="nickname" placeholder="e.g. The Destroyer" maxlength="100">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-danger">Add User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

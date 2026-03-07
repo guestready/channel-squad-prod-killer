@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Log Incident — prod-killer{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Log Incident</h1>
+  <p>Own it. Document it. Never forget.</p>
+</div>
+
+{% if not users %}
+<div class="alert alert-warn">
+  No users yet. <a href="/users">Add users first</a> before logging an incident.
+</div>
+{% else %}
+<div class="form-card">
+  <form method="POST" action="/incidents">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="user_id">Who did this?</label>
+        <select name="user_id" id="user_id" required>
+          <option value="" disabled selected>Select the culprit...</option>
+          {% for user in users %}
+          <option value="{{ user.id }}">{{ user.name }} ({{ user.team }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="occurred_at">When did it happen?</label>
+        <input type="datetime-local" name="occurred_at" id="occurred_at" required>
+        <script>
+          document.getElementById('occurred_at').value = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        </script>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input type="text" name="title" id="title" placeholder="e.g. Dropped the production database" required maxlength="200">
+    </div>
+
+    <div class="form-group">
+      <label for="description">What happened?</label>
+      <textarea name="description" id="description" rows="4" placeholder="Describe the carnage in vivid detail..." required></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="discovered_by">How was it discovered?</label>
+        <textarea name="discovered_by" id="discovered_by" rows="2" placeholder="Monitoring alert? User complaint? Smoke?" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="resolved_by">How was it resolved?</label>
+        <textarea name="resolved_by" id="resolved_by" rows="2" placeholder="Rollback? Hotfix? Sacrificial offering?" required></textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="helpers">Who helped? <span class="label-optional">(optional)</span></label>
+      <input type="text" name="helpers" id="helpers" placeholder="Comma-separated names of heroes">
+    </div>
+
+    <div class="form-group">
+      <label for="links">Relevant links <span class="label-optional">(optional)</span></label>
+      <textarea name="links" id="links" rows="3" placeholder="One URL per line: PRs, dashboards, Slack threads, post-mortems..."></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-danger">File Incident Report</button>
+      <a href="/incidents" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}#{{ incident.id }}: {{ incident.title }} — prod-killer{% endblock %}
+
+{% block content %}
+{% if just_created %}
+<div class="alert alert-success">Incident filed. May it serve as a cautionary tale.</div>
+{% endif %}
+
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <div class="incident-number">Incident #{{ incident.id }}</div>
+    <h1>{{ incident.title }}</h1>
+    <div class="detail-meta">
+      <span class="mono">{{ incident.occurred_at.strftime('%Y-%m-%d at %H:%M') }}</span>
+      <span>&mdash;</span>
+      <span><strong>{{ incident.user.name }}</strong></span>
+      <span class="badge badge-team">{{ incident.user.team }}</span>
+    </div>
+  </div>
+  <a href="/incidents" class="link-muted">&larr; All incidents</a>
+</div>
+
+<div class="detail-card">
+  <div class="detail-field">
+    <div class="field-label">What happened</div>
+    <div class="field-value">{{ incident.description }}</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="detail-card">
+    <div class="detail-field">
+      <div class="field-label">How it was discovered</div>
+      <div class="field-value">{{ incident.discovered_by }}</div>
+    </div>
+  </div>
+  <div class="detail-card">
+    <div class="detail-field">
+      <div class="field-label">How it was resolved</div>
+      <div class="field-value">{{ incident.resolved_by }}</div>
+    </div>
+  </div>
+</div>
+
+{% if incident.helpers %}
+<div class="detail-card">
+  <div class="detail-field">
+    <div class="field-label">Who helped fix it</div>
+    <div class="field-value">{{ incident.helpers }}</div>
+  </div>
+</div>
+{% endif %}
+
+{% if incident.links %}
+<div class="detail-card">
+  <div class="detail-field">
+    <div class="field-label">Relevant links</div>
+    <div class="field-value links-list">
+      {% for link in incident.links.splitlines() %}
+        {% set link = link.strip() %}
+        {% if link %}
+          {% if link.startswith('http') %}
+            <a href="{{ link }}" target="_blank" rel="noopener noreferrer">{{ link }}</a>
+          {% else %}
+            <span>{{ link }}</span>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="detail-footer">
+  Logged on {{ incident.created_at.strftime('%Y-%m-%d at %H:%M') }} UTC
+</div>
+{% endblock %}

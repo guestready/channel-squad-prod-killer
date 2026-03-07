@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — prod-killer{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p>A living monument to human error.</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="label">Total Incidents</div>
+    <div class="value">{{ total }}</div>
+    <div class="sub">all time</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">This Month</div>
+    <div class="value">{{ this_month }}</div>
+    <div class="sub">keep going</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">This Year</div>
+    <div class="value">{{ this_year }}</div>
+    <div class="sub">and counting</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Teams Involved</div>
+    <div class="value">{{ teams }}</div>
+    <div class="sub">none are innocent</div>
+  </div>
+  {% if top_offender %}
+  <div class="stat-card stat-card--highlight">
+    <div class="label">Most Wanted (this month)</div>
+    <div class="value-name">{{ top_offender[0].name }}</div>
+    <div class="sub">{{ top_offender[1] }} incident{{ 's' if top_offender[1] != 1 else '' }} &mdash; {{ top_offender[0].team }}</div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="table-container">
+  <div class="table-header">
+    <h2>Recent Incidents</h2>
+    <a href="/incidents" class="link-muted">View all &rarr;</a>
+  </div>
+  {% if recent_incidents %}
+  <table>
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Title</th>
+        <th>Perpetrator</th>
+        <th>Team</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inc in recent_incidents %}
+      <tr>
+        <td class="mono text-muted">{{ inc.occurred_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><a href="/incidents/{{ inc.id }}">{{ inc.title }}</a></td>
+        <td>{{ inc.user.name }}</td>
+        <td><span class="badge badge-team">{{ inc.user.team }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-title">No incidents yet</div>
+    <p>Production is safe... for now. <a href="/incidents/new">Log the first one.</a></p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

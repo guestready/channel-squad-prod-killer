@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Incidents — prod-killer{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+  <div>
+    <h1>Incidents</h1>
+    <p>Every glorious meltdown, documented for posterity.</p>
+  </div>
+  <a href="/incidents/new" class="btn btn-danger">+ Log Incident</a>
+</div>
+
+<div class="table-container">
+  {% if incidents %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>When</th>
+        <th>Title</th>
+        <th>Perpetrator</th>
+        <th>Team</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inc in incidents %}
+      <tr>
+        <td class="mono text-muted">#{{ inc.id }}</td>
+        <td class="mono text-muted">{{ inc.occurred_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><a href="/incidents/{{ inc.id }}">{{ inc.title }}</a></td>
+        <td>{{ inc.user.name }}</td>
+        <td><span class="badge badge-team">{{ inc.user.team }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-title">Clean slate</div>
+    <p>No incidents on record. <a href="/incidents/new">Be the first</a> to ruin everything.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

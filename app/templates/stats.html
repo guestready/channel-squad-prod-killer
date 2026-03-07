@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Stats — prod-killer{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Stats</h1>
+  <p>Because data-driven shame is the most effective kind.</p>
+</div>
+
+<div class="chart-container">
+  <h2>Incidents Over Time</h2>
+  {% if chart_labels != '[]' %}
+  <canvas id="incidentChart" height="80"></canvas>
+  <script>
+    const ctx = document.getElementById('incidentChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ chart_labels | safe }},
+        datasets: [{
+          label: 'Incidents',
+          data: {{ chart_data | safe }},
+          backgroundColor: 'rgba(229, 62, 62, 0.55)',
+          borderColor: '#e53e3e',
+          borderWidth: 1,
+          borderRadius: 3,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.parsed.y} incident${ctx.parsed.y !== 1 ? 's' : ''}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#7a7f99' },
+            grid: { color: '#2d3143' }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1, color: '#7a7f99' },
+            grid: { color: '#2d3143' }
+          }
+        }
+      }
+    });
+  </script>
+  {% else %}
+  <div class="empty-state" style="padding:2rem;">
+    <p>No data yet. Log some incidents first.</p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="grid-2">
+  <div>
+    <div class="table-container">
+      <div class="table-header"><h2>By User</h2></div>
+      {% if users_stats %}
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Team</th>
+            <th>Total</th>
+            <th>Title</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user, count in users_stats %}
+          <tr>
+            <td>{{ user.name }}</td>
+            <td><span class="badge badge-team">{{ user.team }}</span></td>
+            <td><span class="badge badge-count">{{ count }}</span></td>
+            <td class="funny-title">{{ get_funny_title(count) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state"><p>No data yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    <div class="table-container">
+      <div class="table-header"><h2>By Team</h2></div>
+      {% if team_stats %}
+      <table>
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>Total Incidents</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for team, count in team_stats %}
+          <tr>
+            <td><span class="badge badge-team">{{ team }}</span></td>
+            <td><span class="badge badge-count">{{ count }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state"><p>No data yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

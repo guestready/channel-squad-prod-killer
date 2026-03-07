@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard — prod-killer{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Leaderboard</h1>
+  <p>Ranked by their contributions to collective suffering.</p>
+</div>
+
+<div class="tab-bar" id="tab-bar">
+  <button
+    class="tab {{ 'active' if period == 'monthly' else '' }}"
+    hx-get="/leaderboard/partial?period=monthly"
+    hx-target="#lb-content"
+    hx-swap="innerHTML"
+    onclick="setActiveTab(this)">
+    This Month
+  </button>
+  <button
+    class="tab {{ 'active' if period == 'yearly' else '' }}"
+    hx-get="/leaderboard/partial?period=yearly"
+    hx-target="#lb-content"
+    hx-swap="innerHTML"
+    onclick="setActiveTab(this)">
+    This Year
+  </button>
+</div>
+
+<div class="period-label">{{ label }}</div>
+
+<div class="table-container" id="lb-content">
+  {% include "partials/lb_table.html" %}
+</div>
+
+<script>
+  function setActiveTab(el) {
+    document.querySelectorAll('#tab-bar .tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const period = el.getAttribute('hx-get').includes('yearly') ? 'yearly' : 'monthly';
+    document.querySelector('.period-label').textContent = '';
+  }
+</script>
+{% endblock %}
