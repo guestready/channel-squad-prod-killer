@@ -211,7 +211,17 @@ def get_funny_team_title(count: int) -> str:
         return "Elite Destruction Division"
     if count <= 30:
         return "Most Killer Team"
-    return "The Architects of Doom"
+    if count <= 50:
+        return "The Architects of Doom"
+    if count <= 75:
+        return "Unstoppable Force of Nature"
+    if count <= 100:
+        return "Designated Disaster Response Team"
+    if count <= 150:
+        return "The Scorched Earth Division"
+    if count <= 200:
+        return "Hall of Flame"
+    return "The Final Incident"
 
 
 templates.env.globals["get_funny_title"] = get_funny_title
