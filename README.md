@@ -7,6 +7,13 @@ Document the incident, name the culprit, and let the leaderboard do the rest.
 
 ---
 
+## Demo
+
+<!-- Upload docs/demo.mp4 as a GitHub release asset and replace the src URL below -->
+<video src="https://github.com/jmbcs/prod-killer/releases/download/v1.0/demo.mp4" controls width="100%"></video>
+
+---
+
 ## Features
 
 - **Incident log** — title, description, how it was discovered, how it was resolved, who helped, relevant links
