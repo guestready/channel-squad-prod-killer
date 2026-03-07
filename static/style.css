@@ -593,6 +593,23 @@ select option { background: var(--surface); }
 
 .filter-clear { flex-shrink: 0; }
 
+.filter-date-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.filter-date-lbl {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  user-select: none;
+}
+
 /* ── Leaderboard sections ─────────────────────────────────────────────────── */
 
 .lb-section-label {

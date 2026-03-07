@@ -39,23 +39,14 @@
     {% endfor %}
   </select>
 
-  <select name="timeframe" class="filter-ctrl">
-    <option value=""      {{ 'selected' if timeframe == ''      else '' }}>All time</option>
-    <option value="today" {{ 'selected' if timeframe == 'today' else '' }}>Today</option>
-    <option value="week"  {{ 'selected' if timeframe == 'week'  else '' }}>Last 7 days</option>
-    <option value="30d"   {{ 'selected' if timeframe == '30d'   else '' }}>Last 30 days</option>
-    <option value="month" {{ 'selected' if timeframe == 'month' else '' }}>This month</option>
-    <option value="year"  {{ 'selected' if timeframe == 'year'  else '' }}>This year</option>
-  </select>
+  <div class="filter-date-group">
+    <span class="filter-date-lbl">From</span>
+    <input type="date" name="date_from" value="{{ date_from }}" class="filter-ctrl filter-ctrl--date">
+    <span class="filter-date-lbl">To</span>
+    <input type="date" name="date_to" value="{{ date_to }}" class="filter-ctrl filter-ctrl--date">
+  </div>
 
-  <input
-    type="date"
-    name="date_exact"
-    value="{{ date_exact }}"
-    title="Exact day"
-    class="filter-ctrl filter-ctrl--date">
-
-  {% if q or selected_user_id or timeframe or date_exact or selected_team %}
+  {% if q or selected_user_id or date_from or date_to or selected_team %}
   <a href="/incidents" class="btn btn-secondary filter-clear">Clear</a>
   {% endif %}
 
