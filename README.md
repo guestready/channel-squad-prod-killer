@@ -9,7 +9,7 @@ Document the incident, name the culprit, and let the leaderboard do the rest.
 
 ## Demo
 
-<video src="https://github.com/jmbcs/prod-killer/raw/main/docs/demo.mp4" controls width="100%"></video>
+![Demo](docs/demo.gif)
 
 ---
 
