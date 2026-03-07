@@ -1,23 +1,45 @@
 # prod-killer
 
-Internal post-mortem tracker. Document who broke production, when, and how badly.
+An internal post-mortem tracker for when someone breaks production.
+Document the incident, name the culprit, and let the leaderboard do the rest.
+
+> Built as a team culture / shame-driven accountability tool. No auth required — it's internal.
+
+---
+
+## Features
+
+- **Incident log** — title, description, how it was discovered, how it was resolved, who helped, relevant links
+- **User profiles** — name, team, optional nickname, automatic incident counter
+- **Funny titles** — engineers earn progressively worse titles as their incident count grows (from _Production Guardian_ to _The Nuclear Option_)
+- **Leaderboards** — monthly and yearly rankings with HTMX tab switching
+- **Stats** — bar chart of incidents over time, breakdowns by user and team
+- **Achievement popup** — a random roast message slides in every time an incident is filed
+
+---
 
 ## Stack
 
-- **Backend**: FastAPI + SQLAlchemy
-- **Database**: SQLite
-- **Frontend**: Jinja2 + HTMX + Chart.js
-- **Runtime**: Python 3.12
+| Layer | Tech |
+|---|---|
+| Backend | FastAPI + SQLAlchemy |
+| Database | SQLite (single file, no setup) |
+| Frontend | Jinja2 templates + HTMX + Chart.js |
+| Runtime | Python 3.12 |
 
-## Run with Docker (recommended)
+---
+
+## Quickstart
+
+### Docker (recommended)
 
 ```bash
 docker compose up
 ```
 
-Open http://localhost:8000
+Open http://localhost:8742
 
-## Run locally
+### Local
 
 ```bash
 python -m venv .venv
@@ -29,18 +51,40 @@ uvicorn app.main:app --reload
 
 Open http://localhost:8000
 
+---
+
 ## Pages
 
 | Route | Description |
 |---|---|
-| `/` | Dashboard — recent incidents, stats |
-| `/incidents` | All incidents |
+| `/` | Dashboard — recent incidents + stats snapshot |
+| `/incidents` | Full incident history |
 | `/incidents/new` | Log a new incident |
-| `/users` | Manage users |
-| `/leaderboard` | Monthly / yearly rankings |
-| `/stats` | Charts and team breakdowns |
+| `/users` | Add and view users + their titles |
+| `/leaderboard` | Monthly / yearly shame rankings |
+| `/stats` | Time series chart + per-user and per-team breakdowns |
+
+---
+
+## Funny Titles
+
+| Incidents | Title |
+|---|---|
+| 0 | Production Guardian |
+| 1 | Baby Production Assassin |
+| 2 | Junior Outage Engineer |
+| 3 | Certified Production Menace |
+| 4 | Professional Chaos Agent |
+| 5 | Senior Chaos Architect |
+| 6 | Principal Disruption Engineer |
+| 7–8 | Staff Apocalypse Engineer |
+| 9–12 | Legendary Production Destroyer |
+| 13–19 | Living Legend of Broken Prod |
+| 20+ | The Nuclear Option |
+
+---
 
 ## Data
 
-SQLite database stored at `data/prod_killer.db`. Persisted via Docker volume mount.
+SQLite database at `data/prod_killer.db`, persisted via Docker volume mount.
 To reset: delete the file and restart.

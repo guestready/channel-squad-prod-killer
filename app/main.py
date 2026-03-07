@@ -138,9 +138,10 @@ async def incident_detail(
 @app.get("/users", response_class=HTMLResponse)
 async def users_list(request: Request, created: int = 0, db: Session = Depends(get_db)):
     users = crud.get_users_with_counts(db)
+    teams = crud.get_teams(db)
     return templates.TemplateResponse(
         "users/list.html",
-        {"request": request, "users": users, "just_created": bool(created)},
+        {"request": request, "users": users, "teams": teams, "just_created": bool(created)},
     )
 
 

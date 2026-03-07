@@ -20,6 +20,11 @@ def get_users_with_counts(db: Session) -> list[tuple]:
     )
 
 
+def get_teams(db: Session) -> list[str]:
+    rows = db.query(models.User.team).distinct().order_by(models.User.team).all()
+    return [r.team for r in rows]
+
+
 def get_user(db: Session, user_id: int) -> models.User | None:
     return db.query(models.User).filter(models.User.id == user_id).first()
 

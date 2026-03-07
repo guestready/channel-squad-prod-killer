@@ -3,7 +3,54 @@
 
 {% block content %}
 {% if just_created %}
-<div class="alert alert-success">Incident filed. May it serve as a cautionary tale.</div>
+<div class="achievement" id="achievement">
+  <div class="achievement-icon">★</div>
+  <div class="achievement-body">
+    <div class="achievement-title">ACHIEVEMENT UNLOCKED</div>
+    <div class="achievement-msg" id="achievement-msg"></div>
+  </div>
+  <button class="achievement-close" onclick="dismissAchievement()">✕</button>
+  <div class="achievement-bar" id="achievement-bar"></div>
+</div>
+<script>
+  const messages = [
+    "You played yourself.",
+    "Congrats! You've contributed to the 99.9% downtime SLA.",
+    "git revert HEAD~1 didn't work, did it?",
+    "The dashboard is red. Just like your face right now.",
+    "Error 500: Career.exe has stopped working.",
+    "A new entry has been added to the hall of shame.",
+    "Production is down. But hey, at least you documented it.",
+    "Your on-call rotation just got more interesting.",
+    "The monitoring team has been notified. They are not happy.",
+    "Bold strategy. Let's see if it pays off.",
+    "Have you tried turning it off and on again?",
+    "This incident will be referenced in future onboarding.",
+    "Somewhere, a SRE is crying.",
+    "New personal record. Or is it?",
+    "Your teammates are typing... very aggressively.",
+    "The postmortem writes itself.",
+    "Rollback? What rollback?",
+    "Kubernetes has entered the chat.",
+    "At least the tests were passing.",
+    "Ship it they said. It'll be fine they said.",
+  ];
+  document.getElementById('achievement-msg').textContent =
+    messages[Math.floor(Math.random() * messages.length)];
+
+  const bar = document.getElementById('achievement-bar');
+  bar.style.animationDuration = '5s';
+  bar.classList.add('achievement-bar--running');
+
+  const timer = setTimeout(dismissAchievement, 5000);
+
+  function dismissAchievement() {
+    clearTimeout(timer);
+    const el = document.getElementById('achievement');
+    el.classList.add('achievement--out');
+    setTimeout(() => el.remove(), 400);
+  }
+</script>
 {% endif %}
 
 <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -21,57 +68,53 @@
 </div>
 
 <div class="detail-card">
-  <div class="detail-field">
-    <div class="field-label">What happened</div>
-    <div class="field-value">{{ incident.description }}</div>
-  </div>
-</div>
+  <div class="report-grid">
 
-<div class="grid-2">
-  <div class="detail-card">
-    <div class="detail-field">
+    <div class="report-field report-field--full">
+      <div class="field-label">What happened</div>
+      <div class="field-value">{{ incident.description }}</div>
+    </div>
+
+    <div class="report-field">
       <div class="field-label">How it was discovered</div>
       <div class="field-value">{{ incident.discovered_by }}</div>
     </div>
-  </div>
-  <div class="detail-card">
-    <div class="detail-field">
+
+    <div class="report-field">
       <div class="field-label">How it was resolved</div>
       <div class="field-value">{{ incident.resolved_by }}</div>
     </div>
-  </div>
-</div>
 
-{% if incident.helpers %}
-<div class="detail-card">
-  <div class="detail-field">
-    <div class="field-label">Who helped fix it</div>
-    <div class="field-value">{{ incident.helpers }}</div>
-  </div>
-</div>
-{% endif %}
-
-{% if incident.links %}
-<div class="detail-card">
-  <div class="detail-field">
-    <div class="field-label">Relevant links</div>
-    <div class="field-value links-list">
-      {% for link in incident.links.splitlines() %}
-        {% set link = link.strip() %}
-        {% if link %}
-          {% if link.startswith('http') %}
-            <a href="{{ link }}" target="_blank" rel="noopener noreferrer">{{ link }}</a>
-          {% else %}
-            <span>{{ link }}</span>
-          {% endif %}
-        {% endif %}
-      {% endfor %}
+    <div class="report-field">
+      <div class="field-label">Who helped fix it</div>
+      <div class="field-value">{{ incident.helpers or '—' }}</div>
     </div>
-  </div>
-</div>
-{% endif %}
 
-<div class="detail-footer">
-  Logged on {{ incident.created_at.strftime('%Y-%m-%d at %H:%M') }} UTC
+    <div class="report-field">
+      <div class="field-label">Relevant links</div>
+      {% if incident.links %}
+      <div class="field-value links-list">
+        {% for link in incident.links.splitlines() %}
+          {% set link = link.strip() %}
+          {% if link %}
+            {% if link.startswith('http') %}
+              <a href="{{ link }}" target="_blank" rel="noopener noreferrer">{{ link }}</a>
+            {% else %}
+              <span>{{ link }}</span>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="field-value">—</div>
+      {% endif %}
+    </div>
+
+    <div class="report-field report-field--full report-footer-field">
+      <div class="field-label">Logged at</div>
+      <div class="field-value mono text-muted">{{ incident.created_at.strftime('%Y-%m-%d at %H:%M') }} UTC</div>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

@@ -57,7 +57,12 @@
         </div>
         <div class="form-group">
           <label for="team">Team</label>
-          <input type="text" name="team" id="team" placeholder="e.g. Backend, Platform, Data" required maxlength="100">
+          <input type="text" name="team" id="team" list="teams-list" placeholder="e.g. Backend, Platform, Data" required maxlength="100">
+          <datalist id="teams-list">
+            {% for team in teams %}
+            <option value="{{ team }}">
+            {% endfor %}
+          </datalist>
         </div>
         <div class="form-group">
           <label for="nickname">Nickname <span class="label-optional">(optional)</span></label>
