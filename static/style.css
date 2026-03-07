@@ -512,6 +512,77 @@ select option { background: var(--surface); }
 
 .period-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; }
 
+/* ── Filter bar ───────────────────────────────────────────────────────────── */
+
+.filter-bar {
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-input {
+  flex: 1;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.filter-input:focus { outline: none; border-color: var(--red); }
+
+.filter-date {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  width: auto;
+  color-scheme: dark;
+}
+
+.filter-date:focus { outline: none; border-color: var(--red); }
+
+.filter-select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  width: auto;
+}
+
+.filter-select:focus { outline: none; border-color: var(--red); }
+
+/* ── Leaderboard sections ─────────────────────────────────────────────────── */
+
+.lb-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 0.75rem 1.25rem 0.5rem;
+}
+
+.lb-team-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.5rem 0;
+}
+
 /* ── Stats chart ──────────────────────────────────────────────────────────── */
 
 .chart-container {

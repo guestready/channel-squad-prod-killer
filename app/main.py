@@ -42,7 +42,22 @@ def get_funny_title(count: int) -> str:
     return "The Nuclear Option"
 
 
+def get_funny_team_title(count: int) -> str:
+    if count <= 2:
+        return "Mostly Harmless"
+    if count <= 5:
+        return "Known Troublemakers"
+    if count <= 10:
+        return "Certified Chaos Unit"
+    if count <= 20:
+        return "Elite Destruction Division"
+    if count <= 30:
+        return "Most Killer Team"
+    return "The Architects of Doom"
+
+
 templates.env.globals["get_funny_title"] = get_funny_title
+templates.env.globals["get_funny_team_title"] = get_funny_team_title
 
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -75,10 +90,43 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
 # ── Incidents ─────────────────────────────────────────────────────────────────
 
 @app.get("/incidents", response_class=HTMLResponse)
-async def incidents_list(request: Request, db: Session = Depends(get_db)):
-    incidents = crud.get_incidents(db, limit=200)
+async def incidents_list(
+    request: Request,
+    q: str = "",
+    date_from: str = "",
+    date_to: str = "",
+    team: str = "",
+    db: Session = Depends(get_db),
+):
+    incidents = crud.search_incidents(db, q=q, date_from=date_from, date_to=date_to, team=team)
+    teams = crud.get_teams(db)
     return templates.TemplateResponse(
-        "incidents/list.html", {"request": request, "incidents": incidents}
+        "incidents/list.html",
+        {
+            "request": request,
+            "incidents": incidents,
+            "teams": teams,
+            "q": q,
+            "date_from": date_from,
+            "date_to": date_to,
+            "selected_team": team,
+        },
+    )
+
+
+@app.get("/incidents/partial", response_class=HTMLResponse)
+async def incidents_partial(
+    request: Request,
+    q: str = "",
+    date_from: str = "",
+    date_to: str = "",
+    team: str = "",
+    db: Session = Depends(get_db),
+):
+    incidents = crud.search_incidents(db, q=q, date_from=date_from, date_to=date_to, team=team)
+    return templates.TemplateResponse(
+        "partials/incidents_table.html",
+        {"request": request, "incidents": incidents},
     )
 
 
@@ -165,13 +213,21 @@ async def leaderboard(
     now = datetime.utcnow()
     if period == "yearly":
         rankings = crud.get_yearly_leaderboard(db, now.year)
+        team_rankings = crud.get_yearly_team_leaderboard(db, now.year)
         label = str(now.year)
     else:
         rankings = crud.get_monthly_leaderboard(db, now.year, now.month)
+        team_rankings = crud.get_monthly_team_leaderboard(db, now.year, now.month)
         label = f"{calendar.month_name[now.month]} {now.year}"
     return templates.TemplateResponse(
         "leaderboard.html",
-        {"request": request, "rankings": rankings, "period": period, "label": label},
+        {
+            "request": request,
+            "rankings": rankings,
+            "team_rankings": team_rankings,
+            "period": period,
+            "label": label,
+        },
     )
 
 
@@ -182,13 +238,21 @@ async def leaderboard_partial(
     now = datetime.utcnow()
     if period == "yearly":
         rankings = crud.get_yearly_leaderboard(db, now.year)
+        team_rankings = crud.get_yearly_team_leaderboard(db, now.year)
         label = str(now.year)
     else:
         rankings = crud.get_monthly_leaderboard(db, now.year, now.month)
+        team_rankings = crud.get_monthly_team_leaderboard(db, now.year, now.month)
         label = f"{calendar.month_name[now.month]} {now.year}"
     return templates.TemplateResponse(
         "partials/lb_table.html",
-        {"request": request, "rankings": rankings, "period": period, "label": label},
+        {
+            "request": request,
+            "rankings": rankings,
+            "team_rankings": team_rankings,
+            "period": period,
+            "label": label,
+        },
     )
 
 

@@ -10,35 +10,45 @@
   <a href="/incidents/new" class="btn btn-danger">+ Log Incident</a>
 </div>
 
-<div class="table-container">
-  {% if incidents %}
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>When</th>
-        <th>Title</th>
-        <th>Perpetrator</th>
-        <th>Team</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for inc in incidents %}
-      <tr>
-        <td class="mono text-muted">#{{ inc.id }}</td>
-        <td class="mono text-muted">{{ inc.occurred_at.strftime('%Y-%m-%d %H:%M') }}</td>
-        <td><a href="/incidents/{{ inc.id }}">{{ inc.title }}</a></td>
-        <td>{{ inc.user.name }}</td>
-        <td><span class="badge badge-team">{{ inc.user.team }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <div class="empty-state">
-    <div class="empty-title">Clean slate</div>
-    <p>No incidents on record. <a href="/incidents/new">Be the first</a> to ruin everything.</p>
-  </div>
+<form id="filter-form"
+  hx-get="/incidents/partial"
+  hx-target="#incidents-table"
+  hx-swap="innerHTML"
+  hx-trigger="change, keyup delay:400ms from:[name=q]"
+  hx-sync="this:replace"
+  class="filter-bar">
+  <input
+    type="text"
+    name="q"
+    value="{{ q }}"
+    placeholder="Search by title..."
+    class="filter-input">
+  <input
+    type="date"
+    name="date_from"
+    value="{{ date_from }}"
+    title="From date"
+    class="filter-date">
+  <input
+    type="date"
+    name="date_to"
+    value="{{ date_to }}"
+    title="To date"
+    class="filter-date">
+  <select name="team" class="filter-select">
+    <option value="">All teams</option>
+    {% for team in teams %}
+    <option value="{{ team }}" {{ 'selected' if team == selected_team else '' }}>{{ team }}</option>
+    {% endfor %}
+  </select>
+  {% if q or date_from or date_to or selected_team %}
+  <a href="/incidents" class="btn btn-secondary">Clear</a>
   {% endif %}
+</form>
+
+<div class="table-container">
+  <div id="incidents-table">
+    {% include "partials/incidents_table.html" %}
+  </div>
 </div>
 {% endblock %}

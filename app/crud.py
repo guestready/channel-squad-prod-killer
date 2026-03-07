@@ -49,6 +49,31 @@ def get_incidents(db: Session, limit: int = 100) -> list[models.Incident]:
     )
 
 
+def search_incidents(
+    db: Session,
+    q: str = "",
+    date_from: str = "",
+    date_to: str = "",
+    team: str = "",
+    limit: int = 200,
+) -> list[models.Incident]:
+    query = (
+        db.query(models.Incident)
+        .join(models.User, models.Incident.user_id == models.User.id)
+        .options(joinedload(models.Incident.user))
+        .order_by(models.Incident.occurred_at.desc())
+    )
+    if q:
+        query = query.filter(models.Incident.title.ilike(f"%{q}%"))
+    if date_from:
+        query = query.filter(models.Incident.occurred_at >= datetime.fromisoformat(date_from))
+    if date_to:
+        query = query.filter(models.Incident.occurred_at <= datetime.fromisoformat(date_to + "T23:59:59"))
+    if team:
+        query = query.filter(models.User.team == team)
+    return query.limit(limit).all()
+
+
 def get_incident(db: Session, incident_id: int) -> models.Incident | None:
     return (
         db.query(models.Incident)
@@ -138,6 +163,31 @@ def get_yearly_leaderboard(db: Session, year: int) -> list[tuple]:
         .join(models.Incident, models.User.id == models.Incident.user_id)
         .filter(extract("year", models.Incident.occurred_at) == year)
         .group_by(models.User.id)
+        .order_by(func.count(models.Incident.id).desc())
+        .all()
+    )
+
+
+def get_monthly_team_leaderboard(db: Session, year: int, month: int) -> list[tuple]:
+    return (
+        db.query(models.User.team, func.count(models.Incident.id).label("count"))
+        .join(models.Incident, models.User.id == models.Incident.user_id)
+        .filter(
+            extract("year", models.Incident.occurred_at) == year,
+            extract("month", models.Incident.occurred_at) == month,
+        )
+        .group_by(models.User.team)
+        .order_by(func.count(models.Incident.id).desc())
+        .all()
+    )
+
+
+def get_yearly_team_leaderboard(db: Session, year: int) -> list[tuple]:
+    return (
+        db.query(models.User.team, func.count(models.Incident.id).label("count"))
+        .join(models.Incident, models.User.id == models.Incident.user_id)
+        .filter(extract("year", models.Incident.occurred_at) == year)
+        .group_by(models.User.team)
         .order_by(func.count(models.Incident.id).desc())
         .all()
     )

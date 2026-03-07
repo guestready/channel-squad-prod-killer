@@ -1,0 +1,29 @@
+{% if incidents %}
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>When</th>
+      <th>Title</th>
+      <th>Perpetrator</th>
+      <th>Team</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for inc in incidents %}
+    <tr>
+      <td class="mono text-muted">#{{ inc.id }}</td>
+      <td class="mono text-muted">{{ inc.occurred_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td><a href="/incidents/{{ inc.id }}">{{ inc.title }}</a></td>
+      <td>{{ inc.user.name }}</td>
+      <td><span class="badge badge-team">{{ inc.user.team }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+  <div class="empty-title">No incidents found</div>
+  <p>Try adjusting your filters, or <a href="/incidents/new">log a new one</a>.</p>
+</div>
+{% endif %}
