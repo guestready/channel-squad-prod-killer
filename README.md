@@ -7,6 +7,12 @@ Document the incident, name the culprit, and let the leaderboard do the rest.
 
 ---
 
+## Demo
+
+<video src="docs/demo.mp4" controls width="100%"></video>
+
+---
+
 ## Features
 
 - **Incident log** — title, description, how it was discovered, how it was resolved, who helped, relevant links
