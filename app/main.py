@@ -1,5 +1,6 @@
 import calendar
 import json
+import random
 from datetime import datetime
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
@@ -41,6 +42,39 @@ def get_funny_title(count: int) -> str:
         return "Living Legend of Broken Prod"
     return "The Nuclear Option"
 
+
+
+_INCIDENT_EPITAPHS = [
+    "{name} cried till their sleep that night.",
+    "{name} has never been the same since.",
+    "Sources say {name} blamed it on a cosmic ray.",
+    "{name} quietly pushed a fix and hoped nobody noticed.",
+    "{name} updated their resume that afternoon.",
+    "{name} stared at the ceiling for three hours after this.",
+    "{name} considered a career change. Briefly.",
+    "The on-call team still has nightmares because of {name}.",
+    "{name} told their therapist about this one.",
+    "{name} briefly considered becoming a goat farmer.",
+    "Legend has it {name} is still googling the error.",
+    "{name} blamed it on DNS. It was not DNS.",
+    "{name} discovered that rm -rf does exactly what it says.",
+    "After this, {name}'s rubber duck quit.",
+    "{name} insisted it worked on their machine.",
+    "{name} opened an incognito window and pretended it wasn't them.",
+    "{name} has since developed a strong opinion on feature flags.",
+    "This was the day {name} finally read the documentation.",
+    "{name} swore to write tests. They did not write tests.",
+    "The Slack thread from that day is still pinned as a warning.",
+    "{name} refreshed the dashboard 47 times hoping it would fix itself.",
+    "{name} learned what 'idempotent' means the hard way.",
+    "Nobody spoke to {name} for the rest of the sprint.",
+    "{name} started every sentence that week with 'in hindsight...'",
+    "{name} is now legally required to have a buddy when deploying.",
+]
+
+
+def get_incident_epitaph(name: str) -> str:
+    return random.choice(_INCIDENT_EPITAPHS).format(name=name)
 
 
 def get_funny_team_title(count: int) -> str:
@@ -181,9 +215,10 @@ async def incident_detail(
     incident = crud.get_incident(db, incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
+    epitaph = get_incident_epitaph(incident.user.name)
     return templates.TemplateResponse(
         "incidents/detail.html",
-        {"request": request, "incident": incident, "just_created": bool(new)},
+        {"request": request, "incident": incident, "just_created": bool(new), "epitaph": epitaph},
     )
 
 

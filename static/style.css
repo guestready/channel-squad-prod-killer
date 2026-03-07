@@ -395,6 +395,16 @@ select option { background: var(--surface); }
 
 .detail-footer { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem; }
 
+.epitaph {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
 /* ── Achievement popup ────────────────────────────────────────────────────── */
 
 @keyframes achievement-in {
