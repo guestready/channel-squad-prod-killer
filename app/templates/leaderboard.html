@@ -1,43 +1,61 @@
 {% extends "base.html" %}
-{% block title %}Leaderboard — prod-killer{% endblock %}
+{% block title %}Most Wanted — prod-killer{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h1>Leaderboard</h1>
+  <h1>Most Wanted</h1>
   <p>Ranked by their contributions to collective suffering.</p>
 </div>
 
-<div class="tab-bar" id="tab-bar">
-  <button
-    class="tab {{ 'active' if period == 'monthly' else '' }}"
-    hx-get="/leaderboard/partial?period=monthly"
-    hx-target="#lb-content"
-    hx-swap="innerHTML"
-    onclick="setActiveTab(this)">
-    This Month
-  </button>
-  <button
-    class="tab {{ 'active' if period == 'yearly' else '' }}"
-    hx-get="/leaderboard/partial?period=yearly"
-    hx-target="#lb-content"
-    hx-swap="innerHTML"
-    onclick="setActiveTab(this)">
-    This Year
-  </button>
+<div class="lb-tab-row">
+  <div class="tab-bar">
+    <button class="tab {{ 'active' if view == 'individuals' else '' }}" data-view="individuals" onclick="setView(this)">Individuals</button>
+    <button class="tab {{ 'active' if view == 'teams' else '' }}" data-view="teams" onclick="setView(this)">Teams</button>
+  </div>
+  <div class="tab-bar">
+    <button class="tab {{ 'active' if period == 'monthly' else '' }}" data-period="monthly" onclick="setPeriod(this)">This Month</button>
+    <button class="tab {{ 'active' if period == 'yearly' else '' }}" data-period="yearly" onclick="setPeriod(this)">This Year</button>
+    <button class="tab {{ 'active' if period == 'alltime' else '' }}" data-period="alltime" onclick="setPeriod(this)">All Time</button>
+  </div>
 </div>
 
-<div class="period-label">{{ label }}</div>
+<div class="period-label" id="lb-period">{{ label }}</div>
 
 <div class="table-container" id="lb-content">
   {% include "partials/lb_table.html" %}
 </div>
 
 <script>
-  function setActiveTab(el) {
-    document.querySelectorAll('#tab-bar .tab').forEach(t => t.classList.remove('active'));
+  let currentView = '{{ view }}';
+  let currentPeriod = '{{ period }}';
+
+  const _now = new Date();
+  const _periodLabels = {
+    monthly: _now.toLocaleString('en', { month: 'long', year: 'numeric' }),
+    yearly: String(_now.getFullYear()),
+    alltime: 'All Time',
+  };
+
+  function setView(el) {
+    document.querySelectorAll('[data-view]').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    const period = el.getAttribute('hx-get').includes('yearly') ? 'yearly' : 'monthly';
-    document.querySelector('.period-label').textContent = '';
+    currentView = el.dataset.view;
+    loadLb();
+  }
+
+  function setPeriod(el) {
+    document.querySelectorAll('[data-period]').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentPeriod = el.dataset.period;
+    document.getElementById('lb-period').textContent = _periodLabels[currentPeriod] || '';
+    loadLb();
+  }
+
+  function loadLb() {
+    htmx.ajax('GET', `/leaderboard/partial?view=${currentView}&period=${currentPeriod}`, {
+      target: '#lb-content',
+      swap: 'innerHTML'
+    });
   }
 </script>
 {% endblock %}

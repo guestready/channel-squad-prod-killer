@@ -53,6 +53,10 @@
 </script>
 {% endif %}
 
+{% if just_edited %}
+<div class="alert alert-warn">History has been rewritten. How very convenient.</div>
+{% endif %}
+
 <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
   <div>
     <div class="incident-number">Incident #{{ incident.id }}</div>
@@ -64,7 +68,16 @@
       <span class="badge badge-team">{{ incident.user.team }}</span>
     </div>
   </div>
-  <a href="/incidents" class="link-muted">&larr; All incidents</a>
+  <div style="display:flex; align-items:center; gap:0.5rem;">
+    <a href="/incidents/{{ incident.id }}/edit" class="btn btn-ghost">Edit</a>
+    <form id="delete-incident-{{ incident.id }}" method="POST" action="/incidents/{{ incident.id }}/delete">
+      <button type="button" class="btn btn-ghost-danger"
+        onclick="confirmAction('Burn the evidence? This is legally dubious. The incident will be gone — the shame, eternal.', 'delete-incident-{{ incident.id }}', 'Burn it')">
+        Delete
+      </button>
+    </form>
+    <a href="/incidents" class="link-muted" style="margin-left:0.5rem;">&larr; All incidents</a>
+  </div>
 </div>
 
 <div class="detail-card">
@@ -117,4 +130,7 @@
 
   </div>
 </div>
+
+<div class="epitaph">{{ epitaph }}</div>
+
 {% endblock %}

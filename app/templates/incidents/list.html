@@ -1,44 +1,70 @@
 {% extends "base.html" %}
-{% block title %}Incidents — prod-killer{% endblock %}
+{% block title %}Crime Log — prod-killer{% endblock %}
 
 {% block content %}
 <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
   <div>
-    <h1>Incidents</h1>
+    <h1>Crime Log</h1>
     <p>Every glorious meltdown, documented for posterity.</p>
   </div>
-  <a href="/incidents/new" class="btn btn-danger">+ Log Incident</a>
+  <a href="/incidents/new" class="btn btn-danger">I Broke It</a>
 </div>
 
-<div class="table-container">
-  {% if incidents %}
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>When</th>
-        <th>Title</th>
-        <th>Perpetrator</th>
-        <th>Team</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for inc in incidents %}
-      <tr>
-        <td class="mono text-muted">#{{ inc.id }}</td>
-        <td class="mono text-muted">{{ inc.occurred_at.strftime('%Y-%m-%d %H:%M') }}</td>
-        <td><a href="/incidents/{{ inc.id }}">{{ inc.title }}</a></td>
-        <td>{{ inc.user.name }}</td>
-        <td><span class="badge badge-team">{{ inc.user.team }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <div class="empty-state">
-    <div class="empty-title">Clean slate</div>
-    <p>No incidents on record. <a href="/incidents/new">Be the first</a> to ruin everything.</p>
+{% if just_deleted %}
+<div class="alert alert-warn">Incident redacted. We all know what really happened.</div>
+{% endif %}
+
+<form id="filter-form"
+  hx-get="/incidents/partial"
+  hx-target="#incidents-table"
+  hx-swap="innerHTML"
+  hx-trigger="change, keyup delay:400ms from:[name=q]"
+  hx-sync="this:replace"
+  class="filter-bar">
+
+  <input
+    type="text"
+    name="q"
+    value="{{ q }}"
+    placeholder="Search the carnage..."
+    class="filter-input">
+
+  <select name="user_id" class="filter-ctrl">
+    <option value="0" {{ 'selected' if selected_user_id == 0 else '' }}>All users</option>
+    {% for user in users %}
+    <option value="{{ user.id }}" {{ 'selected' if user.id == selected_user_id else '' }}>{{ user.name }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="team" class="filter-ctrl">
+    <option value="">All teams</option>
+    {% for team in teams %}
+    <option value="{{ team }}" {{ 'selected' if team == selected_team else '' }}>{{ team }}</option>
+    {% endfor %}
+  </select>
+
+  <div class="filter-date-group">
+    <label class="date-range-field">
+      <span class="date-range-lbl">From</span>
+      <input type="date" name="date_from" value="{{ date_from }}" class="filter-ctrl--date">
+    </label>
+    <label class="date-range-field">
+      <span class="date-range-lbl">To</span>
+      <input type="date" name="date_to" value="{{ date_to }}" class="filter-ctrl--date">
+    </label>
   </div>
+
+  {% if q or selected_user_id or date_from or date_to or selected_team %}
+  <a href="/incidents" class="btn btn-secondary filter-clear">Clear</a>
   {% endif %}
+
+</form>
+
+<div class="table-container">
+  <div id="incidents-table">
+    {% include "partials/incidents_table.html" %}
+  </div>
 </div>
 {% endblock %}
+
+{% block head %}{% endblock %}

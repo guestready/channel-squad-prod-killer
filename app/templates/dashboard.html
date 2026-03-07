@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — prod-killer{% endblock %}
+{% block title %}War Room — prod-killer{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h1>Dashboard</h1>
+  <h1>War Room</h1>
   <p>A living monument to human error.</p>
 </div>
 
@@ -63,10 +63,26 @@
       {% endfor %}
     </tbody>
   </table>
+  {% if total_pages > 1 %}
+  <div class="pagination">
+    {% if page > 1 %}
+    <a href="/?page={{ page - 1 }}" class="btn btn-secondary pagination-btn">&larr; Prev</a>
+    {% else %}
+    <span class="pagination-btn pagination-disabled">&larr; Prev</span>
+    {% endif %}
+    <span class="pagination-info">Page {{ page }} of {{ total_pages }}</span>
+    {% if page < total_pages %}
+    <a href="/?page={{ page + 1 }}" class="btn btn-secondary pagination-btn">Next &rarr;</a>
+    {% else %}
+    <span class="pagination-btn pagination-disabled">Next &rarr;</span>
+    {% endif %}
+  </div>
+  {% endif %}
   {% else %}
   <div class="empty-state">
-    <div class="empty-title">No incidents yet</div>
-    <p>Production is safe... for now. <a href="/incidents/new">Log the first one.</a></p>
+    <div class="empty-title">No incidents on record. Very suspicious.</div>
+    <p>Either your team is incredibly competent, or nobody's been honest yet.<br>
+    <a href="/incidents/new">Be the first to confess.</a></p>
   </div>
   {% endif %}
 </div>

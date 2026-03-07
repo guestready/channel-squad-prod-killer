@@ -1,0 +1,30 @@
+{% if incidents %}
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>When</th>
+      <th>Title</th>
+      <th>Perpetrator</th>
+      <th>Team</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for inc in incidents %}
+    <tr>
+      <td class="mono text-muted">#{{ inc.id }}</td>
+      <td class="mono text-muted">{{ inc.occurred_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td><a href="/incidents/{{ inc.id }}">{{ inc.title }}</a></td>
+      <td>{{ inc.user.name }}</td>
+      <td><span class="badge badge-team">{{ inc.user.team }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+  <div class="empty-title">Nothing to see here. Suspicious.</div>
+  <p>Either your filters are too strict, production is genuinely alive, or everyone is in denial.<br>
+  <a href="/incidents/new">Be the one to break the silence.</a></p>
+</div>
+{% endif %}

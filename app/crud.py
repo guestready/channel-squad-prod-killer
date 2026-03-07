@@ -37,16 +37,66 @@ def create_user(db: Session, name: str, team: str, nickname: str | None = None) 
     return user
 
 
+def update_user(db: Session, user_id: int, name: str, team: str, nickname: str | None) -> models.User | None:
+    user = get_user(db, user_id)
+    if not user:
+        return None
+    user.name = name
+    user.team = team
+    user.nickname = nickname or None
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def delete_user(db: Session, user_id: int) -> bool:
+    user = get_user(db, user_id)
+    if not user:
+        return False
+    db.delete(user)
+    db.commit()
+    return True
+
+
 # ── Incidents ─────────────────────────────────────────────────────────────────
 
-def get_incidents(db: Session, limit: int = 100) -> list[models.Incident]:
+def get_incidents(db: Session, limit: int = 100, offset: int = 0) -> list[models.Incident]:
     return (
         db.query(models.Incident)
         .options(joinedload(models.Incident.user))
         .order_by(models.Incident.occurred_at.desc())
+        .offset(offset)
         .limit(limit)
         .all()
     )
+
+
+def search_incidents(
+    db: Session,
+    q: str = "",
+    user_id: int = 0,
+    date_from: str = "",
+    date_to: str = "",
+    team: str = "",
+    limit: int = 200,
+) -> list[models.Incident]:
+    query = (
+        db.query(models.Incident)
+        .join(models.User, models.Incident.user_id == models.User.id)
+        .options(joinedload(models.Incident.user))
+        .order_by(models.Incident.occurred_at.desc())
+    )
+    if q:
+        query = query.filter(models.Incident.title.ilike(f"%{q}%"))
+    if user_id:
+        query = query.filter(models.Incident.user_id == user_id)
+    if date_from:
+        query = query.filter(models.Incident.occurred_at >= datetime.fromisoformat(date_from))
+    if date_to:
+        query = query.filter(models.Incident.occurred_at <= datetime.fromisoformat(date_to + "T23:59:59"))
+    if team:
+        query = query.filter(models.User.team == team)
+    return query.limit(limit).all()
 
 
 def get_incident(db: Session, incident_id: int) -> models.Incident | None:
@@ -83,6 +133,43 @@ def create_incident(
     db.commit()
     db.refresh(incident)
     return incident
+
+
+def update_incident(
+    db: Session,
+    incident_id: int,
+    user_id: int,
+    title: str,
+    description: str,
+    discovered_by: str,
+    resolved_by: str,
+    helpers: str,
+    links: str,
+    occurred_at: datetime,
+) -> models.Incident | None:
+    incident = get_incident(db, incident_id)
+    if not incident:
+        return None
+    incident.user_id = user_id
+    incident.title = title
+    incident.description = description
+    incident.discovered_by = discovered_by
+    incident.resolved_by = resolved_by
+    incident.helpers = helpers or None
+    incident.links = links or None
+    incident.occurred_at = occurred_at
+    db.commit()
+    db.refresh(incident)
+    return incident
+
+
+def delete_incident(db: Session, incident_id: int) -> bool:
+    incident = get_incident(db, incident_id)
+    if not incident:
+        return False
+    db.delete(incident)
+    db.commit()
+    return True
 
 
 def count_incidents(db: Session) -> int:
@@ -138,6 +225,51 @@ def get_yearly_leaderboard(db: Session, year: int) -> list[tuple]:
         .join(models.Incident, models.User.id == models.Incident.user_id)
         .filter(extract("year", models.Incident.occurred_at) == year)
         .group_by(models.User.id)
+        .order_by(func.count(models.Incident.id).desc())
+        .all()
+    )
+
+
+def get_monthly_team_leaderboard(db: Session, year: int, month: int) -> list[tuple]:
+    return (
+        db.query(models.User.team, func.count(models.Incident.id).label("count"))
+        .join(models.Incident, models.User.id == models.Incident.user_id)
+        .filter(
+            extract("year", models.Incident.occurred_at) == year,
+            extract("month", models.Incident.occurred_at) == month,
+        )
+        .group_by(models.User.team)
+        .order_by(func.count(models.Incident.id).desc())
+        .all()
+    )
+
+
+def get_yearly_team_leaderboard(db: Session, year: int) -> list[tuple]:
+    return (
+        db.query(models.User.team, func.count(models.Incident.id).label("count"))
+        .join(models.Incident, models.User.id == models.Incident.user_id)
+        .filter(extract("year", models.Incident.occurred_at) == year)
+        .group_by(models.User.team)
+        .order_by(func.count(models.Incident.id).desc())
+        .all()
+    )
+
+
+def get_alltime_leaderboard(db: Session) -> list[tuple]:
+    return (
+        db.query(models.User, func.count(models.Incident.id).label("count"))
+        .join(models.Incident, models.User.id == models.Incident.user_id)
+        .group_by(models.User.id)
+        .order_by(func.count(models.Incident.id).desc())
+        .all()
+    )
+
+
+def get_alltime_team_leaderboard(db: Session) -> list[tuple]:
+    return (
+        db.query(models.User.team, func.count(models.Incident.id).label("count"))
+        .join(models.Incident, models.User.id == models.Incident.user_id)
+        .group_by(models.User.team)
         .order_by(func.count(models.Incident.id).desc())
         .all()
     )

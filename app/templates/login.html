@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>prod-killer — Access Restricted</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 360px;
+    }
+    .login-logo {
+      font-family: 'Courier New', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--red);
+      letter-spacing: -0.5px;
+      margin-bottom: 0.25rem;
+    }
+    .login-tagline {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+    .login-card label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+    .login-card input[type="password"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.75rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      margin-bottom: 1.25rem;
+      transition: border-color 0.15s;
+    }
+    .login-card input[type="password"]:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 2px rgba(229,62,62,0.15);
+    }
+    .login-card .btn {
+      width: 100%;
+      text-align: center;
+      padding: 0.65rem;
+    }
+    .login-error {
+      background: var(--red-dim);
+      border: 1px solid #7a2020;
+      color: var(--red-light);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.75rem;
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">prod-killer</div>
+      <div class="login-tagline">your team's hall of shame</div>
+
+      {% if error %}
+      <div class="login-error">Wrong password. Nice try though.</div>
+      {% endif %}
+
+      <form method="POST" action="/login">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" autofocus placeholder="••••••••" required>
+        <button type="submit" class="btn btn-danger">Enter the Crime Scene</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
