@@ -15,17 +15,41 @@
       <span class="nav-tagline">your team's hall of shame</span>
     </div>
     <ul class="nav-links">
-      <li><a href="/" class="{{ 'active' if request.url.path == '/' else '' }}">Dashboard</a></li>
-      <li><a href="/incidents" class="{{ 'active' if request.url.path.startswith('/incidents') and request.url.path != '/incidents/new' else '' }}">Incidents</a></li>
-      <li><a href="/users" class="{{ 'active' if request.url.path.startswith('/users') else '' }}">Users</a></li>
-      <li><a href="/leaderboard" class="{{ 'active' if request.url.path.startswith('/leaderboard') else '' }}">Leaderboard</a></li>
-      <li><a href="/stats" class="{{ 'active' if request.url.path.startswith('/stats') else '' }}">Stats</a></li>
+      <li><a href="/" class="{{ 'active' if request.url.path == '/' else '' }}">War Room</a></li>
+      <li><a href="/incidents" class="{{ 'active' if request.url.path.startswith('/incidents') and request.url.path != '/incidents/new' else '' }}">Crime Log</a></li>
+      <li><a href="/users" class="{{ 'active' if request.url.path.startswith('/users') else '' }}">Suspects</a></li>
+      <li><a href="/leaderboard" class="{{ 'active' if request.url.path.startswith('/leaderboard') else '' }}">Most Wanted</a></li>
+      <li><a href="/stats" class="{{ 'active' if request.url.path.startswith('/stats') else '' }}">Body Count</a></li>
       <li><a href="/incidents/new" class="btn-nav-primary">I Broke It</a></li>
+      <li>
+        <form method="POST" action="/logout" style="display:inline;">
+          <button type="submit" class="btn-logout">Sign Out</button>
+        </form>
+      </li>
     </ul>
   </nav>
 
   <main class="container">
     {% block content %}{% endblock %}
   </main>
+
+  <dialog id="confirm-dialog" class="confirm-dialog">
+    <p class="confirm-msg" id="confirm-msg"></p>
+    <div class="confirm-actions">
+      <button class="btn btn-danger" id="confirm-ok">Do it</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('confirm-dialog').close()">Nevermind</button>
+    </div>
+  </dialog>
+
+  <script>
+    function confirmAction(message, formId, okLabel) {
+      const dialog = document.getElementById('confirm-dialog');
+      document.getElementById('confirm-msg').textContent = message;
+      const ok = document.getElementById('confirm-ok');
+      ok.textContent = okLabel || 'Do it';
+      ok.onclick = () => { dialog.close(); document.getElementById(formId).submit(); };
+      dialog.showModal();
+    }
+  </script>
 </body>
 </html>

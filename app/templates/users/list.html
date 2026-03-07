@@ -1,14 +1,23 @@
 {% extends "base.html" %}
-{% block title %}Users — prod-killer{% endblock %}
+{% block title %}Suspects — prod-killer{% endblock %}
 
 {% block content %}
 {% if just_created %}
 <div class="alert alert-success">User added. They will regret this.</div>
 {% endif %}
+{% if just_edited %}
+<div class="alert alert-success">Identity updated. Still the same person, though.</div>
+{% endif %}
+{% if just_deleted %}
+<div class="alert alert-warn">Suspect eliminated. Their absence has been noted.</div>
+{% endif %}
+{% if blocked_user %}
+<div class="alert alert-warn">Can't delete {{ blocked_user.name }}. They have documented crimes on record. History must stand.</div>
+{% endif %}
 
 <div class="page-header">
-  <h1>Users</h1>
-  <p>The suspects.</p>
+  <h1>Suspects</h1>
+  <p>Known associates. Handle with suspicion.</p>
 </div>
 
 <div class="grid-2" style="align-items: start;">
@@ -22,6 +31,7 @@
             <th>Team</th>
             <th>Incidents</th>
             <th>Title</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -34,6 +44,15 @@
             <td><span class="badge badge-team">{{ user.team }}</span></td>
             <td><span class="badge badge-count">{{ count }}</span></td>
             <td class="funny-title">{{ get_funny_title(count) }}</td>
+            <td style="white-space:nowrap;">
+              <a href="/users/{{ user.id }}/edit" class="btn btn-ghost">Edit</a>
+              <form id="delete-user-{{ user.id }}" method="POST" action="/users/{{ user.id }}/delete" style="display:inline;">
+                <button type="button" class="btn btn-ghost-danger"
+                  onclick="confirmAction('Erase {{ user.name }} from the records? Their crimes will remain on file forever.', 'delete-user-{{ user.id }}', 'Erase them')">
+                  Delete
+                </button>
+              </form>
+            </td>
           </tr>
           {% endfor %}
         </tbody>

@@ -1,14 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Incidents — prod-killer{% endblock %}
+{% block title %}Crime Log — prod-killer{% endblock %}
 
 {% block content %}
 <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
   <div>
-    <h1>Incidents</h1>
+    <h1>Crime Log</h1>
     <p>Every glorious meltdown, documented for posterity.</p>
   </div>
   <a href="/incidents/new" class="btn btn-danger">I Broke It</a>
 </div>
+
+{% if just_deleted %}
+<div class="alert alert-warn">Incident redacted. We all know what really happened.</div>
+{% endif %}
 
 <form id="filter-form"
   hx-get="/incidents/partial"
@@ -40,10 +44,14 @@
   </select>
 
   <div class="filter-date-group">
-    <span class="filter-date-lbl">From</span>
-    <input type="date" name="date_from" value="{{ date_from }}" class="filter-ctrl filter-ctrl--date">
-    <span class="filter-date-lbl">To</span>
-    <input type="date" name="date_to" value="{{ date_to }}" class="filter-ctrl filter-ctrl--date">
+    <label class="date-range-field">
+      <span class="date-range-lbl">From</span>
+      <input type="date" name="date_from" value="{{ date_from }}" class="filter-ctrl--date">
+    </label>
+    <label class="date-range-field">
+      <span class="date-range-lbl">To</span>
+      <input type="date" name="date_to" value="{{ date_to }}" class="filter-ctrl--date">
+    </label>
   </div>
 
   {% if q or selected_user_id or date_from or date_to or selected_team %}
@@ -58,3 +66,5 @@
   </div>
 </div>
 {% endblock %}
+
+{% block head %}{% endblock %}
