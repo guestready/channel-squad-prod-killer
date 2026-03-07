@@ -9,7 +9,7 @@ Document the incident, name the culprit, and let the leaderboard do the rest.
 
 ## Demo
 
-<video src="docs/demo.mp4" controls width="100%"></video>
+![Demo](docs/demo.gif)
 
 ---
 
