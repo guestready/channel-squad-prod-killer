@@ -9,4 +9,5 @@ services:
       APP_PASSWORD: ${APP_PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
       SEED_DATA: ${SEED_DATA:-false}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///./data/prod_killer.db}
     restart: unless-stopped
