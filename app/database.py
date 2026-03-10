@@ -2,8 +2,11 @@ import logging
 import os
 import re
 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
