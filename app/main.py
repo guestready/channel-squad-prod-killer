@@ -59,6 +59,7 @@ async def on_startup():
     from .database import SQLALCHEMY_DATABASE_URL, _safe_url, check_db_connection
 
     logger.info("Starting prod-killer")
+    logger.info("DATABASE_URL env var set: %s", bool(os.getenv("DATABASE_URL")))
     logger.info("Database: %s", _safe_url(SQLALCHEMY_DATABASE_URL))
 
     if not os.getenv("APP_PASSWORD"):
