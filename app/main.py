@@ -1,9 +1,16 @@
 import calendar
 import json
+import logging
 import os
 import random
 import secrets
 from datetime import datetime
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
@@ -49,14 +56,30 @@ app.add_middleware(SessionMiddleware, secret_key=_SECRET_KEY, session_cookie="pk
 
 @app.on_event("startup")
 async def on_startup():
+    from .database import SQLALCHEMY_DATABASE_URL, _safe_url, check_db_connection
+
+    logger.info("Starting prod-killer")
+    logger.info("Database: %s", _safe_url(SQLALCHEMY_DATABASE_URL))
+
+    if not os.getenv("APP_PASSWORD"):
+        logger.warning("APP_PASSWORD not set — authentication disabled")
+
+    if check_db_connection():
+        logger.info("DB connection OK")
+    else:
+        logger.error("DB connection FAILED — app may not function correctly")
+
     if os.getenv("SEED_DATA", "").lower() == "true":
         from .database import SessionLocal
         from .seed import seed_database
         db = SessionLocal()
         try:
             seed_database(db)
+            logger.info("Seed data loaded")
         finally:
             db.close()
+
+    logger.info("Startup complete")
 
 
 @app.get("/login", response_class=HTMLResponse)
